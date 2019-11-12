@@ -104,7 +104,7 @@ class TempMotifCounter {
   //   counts(0, 1): u --> v, v --> u, v --> u  (M_{5,2})
   //   counts(1, 0): u --> v, u --> v, u --> v  (M_{6,1})
   //   counts(1, 1): u --> v, u --> v, v --> u  (M_{6,2})
-  void Count3TEdge2Node(double delta, Counter2D& counts);
+  void Count3TEdge2Node(double delta_w, double delta_c, Counter2D& counts);
   
   // Similar to Count3TEdge2Node() except only counts motif instances
   // for a given pair of nodes u and v and specifies the source and destination
@@ -117,7 +117,7 @@ class TempMotifCounter {
   //   counts(1, 0, 1): v --> u, u --> v, v --> u
   //   counts(0, 0, 1): u --> v, u --> v, v --> u
   //   counts(1, 1, 0): v --> u, v --> u, u --> v
-  void Count3TEdge2Node(int u, int v, double delta, Counter3D& counts);
+  void Count3TEdge2Node(int u, int v, double delta_w, double delta_c, Counter3D& counts);
 
   // Counts 3-edge, 3-node star motifs and places the results in pre_counts,
   // pos_counts, and mid_counts.  Counts take the following structure (with
@@ -137,7 +137,7 @@ class TempMotifCounter {
   
   // Counts the same information as Count3TEdge3NodeStars() but uses a naive
   // counting algorithm that iterates over all pairs of neighbors.
-  void Count3TEdge3NodeStarsNaive(double delta, Counter3D& pre_counts,
+  void Count3TEdge3NodeStarsNaive(double delta_w, double delta_c, Counter3D& pre_counts,
                                   Counter3D& pos_counts, Counter3D& mid_counts);
 
   // Counts 3-edge triad events and places the result in counts:
@@ -154,11 +154,11 @@ class TempMotifCounter {
   
   // Counts the same information as Count3TEdgeTriads() but uses a naive
   // counting algorithm that enumerates over all triangles in the static graph.
-  void Count3TEdgeTriadsNaive(double delta, Counter3D& counts);
+  void Count3TEdgeTriadsNaive(double delta_w, double delta_c, Counter3D& counts);
 
   // Counts all 3-edge, {2,3}-node temporal motifs and places the result in
   // counts such that counts(i, j) corresponds to motif M_{i,j}.
-  void Count3TEdge23Node(double delta, Counter2D& counts);  
+  void Count3TEdge23Node(double delta_w, double delta_c, Counter2D& counts);
 
  private:
   // Get all triangles in the static graph, (Us(i), Vs(i), Ws(i)) is the ith
@@ -202,7 +202,7 @@ class ThreeTEdgeMotifCounter {
   // stores the results in the counter, where counts(e, f, g) is the motif consisting
   // of the ordered edges e, f, g.
   void Count(const TIntV& event_string, const TIntV& timestamps,
-             double delta, Counter3D& counts);
+             double delta_w, double delta_c, Counter3D& counts);
 
  private:
   void IncrementCounts(int event);
