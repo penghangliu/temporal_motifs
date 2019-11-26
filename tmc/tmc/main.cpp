@@ -17,20 +17,32 @@ int main(int argc, char * argv[]) {
     string gname = tmp.substr (tmp.find_last_of("/") + 1);
     int N_vtx=stoi(argv[2]);
     int N_event=stoi(argv[3]);
-    int d_c=stoi(argv[3]);
-    int d_w=stoi(argv[4]);
+    int d_c=stoi(argv[4]);
+    int d_w=stoi(argv[5]);
     string out_file = "out_" + gname;
     FILE* fp = fopen (out_file.c_str(), "w");
     
+    cout << "delta W: " << d_w << endl;
+    cout << "delta C: " << d_c << endl;
+    
     vector<event> events;
     createEvents(gname, events);
+    const auto t2 = chrono::steady_clock::now();
+    print_time (fp, "Read data time: ", t2 - t1);
     cout << "# of events: " << events.size() << endl;
+//    for (auto it=events.begin(); it!=events.end(); ++it) {
+//        cout << (*it).first << " " << (*it).second.first << " " << (*it).second.second << endl;
+//    }
     
     instancemap instances;
     set<vector<event>> keys;
     for (size_t i=0; i<events.size(); i++) {
         countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w);
+//        cout << "key size " << keys.size() << endl;
+//        cout << "map size " << instances.size() << endl;
     }
+    const auto t3 = chrono::steady_clock::now();
+    print_time (fp, "Count instances time: ", t3 - t2);
     cout << "# of instances: " << instances.size() << endl;
 
     map<string, int> motif_count;
@@ -40,13 +52,12 @@ int main(int argc, char * argv[]) {
             motif_count[motif] += it->second.first;
         }
     }
-    for (auto it=motif_count.begin(); it!=motif_count.end(); ++it) {
-        fprintf(fp, "%s \t %d \n", (*it).first.c_str(), (*it).second);
-    }
     
-    std::cout << "Hello, World!\n";
-    const auto t2 = chrono::steady_clock::now();
-    print_time (fp, "End-to-end Time: ", t2 - t1);
+    
+//    std::cout << "Hello, World!\n";
+    const auto t4 = chrono::steady_clock::now();
+    print_time (fp, "Count motifs time: ", t4 - t3);
+    print_time (fp, "End-to-end Time: ", t4 - t1);
     
 //    for (int i=0; i<events.size(); i++) {
 //        fprintf(fp, "%d \t %d \t %d \n", events[i].second.first, events[i].second.second, events[i].first);
@@ -127,6 +138,9 @@ int main(int argc, char * argv[]) {
 //        cout << "star" << it->first << it->second << endl;
 //    }
     
+    for (auto it=motif_count.begin(); it!=motif_count.end(); ++it) {
+        fprintf(fp, "%s \t %d \n", (*it).first.c_str(), (*it).second);
+    }
     fclose (fp);
     return 0;
 }
