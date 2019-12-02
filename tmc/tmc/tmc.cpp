@@ -32,62 +32,43 @@ void createEvents (string filename, vector<event>& events){
 void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w){
     vertex u = e.second.first;
     vertex v = e.second.second;
-    vector<vector<event>> new_motif;
-//    int a = 1;
-//    cout << "check event " << u << " " << v << ": " << endl;
-    for (auto it = keys.begin(); it != keys.end();) {
-//        cout << "create" << endl;
+    vector<vector<event>> new_motif;    //used to store the new motifs
+    for (auto it = keys.begin(); it != keys.end();) {   //for each current prefix
         vector<event> key = *it;
-//        cout << "check key " << a << " size " << key.size() << ": ";
-        
-//        cout << key.size() << endl;
-//        cout << "event time: " << e.first << endl;
-//        cout << "d_w: " << e.first - key.front().first << endl;
-//        cout << "d_c: " << e.first - key.back().first << endl;
-        if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c) {
-//            a++;
-            if (key.size() < N_event) {
+        if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c) {  //check delta C and delta W
+            if (key.size() < N_event) { //check the number of events
                 set<vertex> nodes = imap[key].second;
-//                cout << "node size " << nodes.size() << endl;
                 nodes.insert(u);
                 nodes.insert(v);
-                if (nodes.size() <= N_vtx) {
+                if (nodes.size() <= N_vtx) {    //check the number of vertices
                     if (imap[key].second.find(u)!=imap[key].second.end() || imap[key].second.find(v)!=imap[key].second.end()) {
-//                        cout << "set: ";
-//                        for (auto tt = imap[key].second.begin(); tt!=imap[key].second.end(); ++tt) {
-//                            cout << *tt << " ";
-//                        }
-//                        cout << endl;
                         vector<event> motif = key;
                         motif.push_back(e);
                         new_motif.push_back(motif);
                         imap[motif].first += imap[key].first;
                         imap[motif].second = nodes;
-//                        cout << "time " << e.first << " "<< key.front().first << endl;
                     }
                 }
                 ++it;
             } else {
-                it = keys.erase(it);
+                it = keys.erase(it);    //remove prefix if it exceeds the size constrain
             }
         } else {
-            it = keys.erase(it);
+            it = keys.erase(it);    //remove prefix if it exceeds the delat constrain
         }
     }
+    //add the new motifs to the current prefix list
     if (!new_motif.empty()) {
         for (vector<event> const &mt: new_motif) {
             keys.insert(mt);
         }
     }
-//    cout << "a " << a << endl;
-//    cout << "map size " << imap.size() << endl;
     vector<event> E;
     E.push_back(e);
     imap[E].first += 1;
     imap[E].second.insert(u);
     imap[E].second.insert(v);
-    keys.insert(E);
-//    cout << "add edge " << u << " " << v << endl;
+    keys.insert(E); // add the new event to the current prefix list
     return;
 }
 

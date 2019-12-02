@@ -1,0 +1,10 @@
+Read data time:  0.000583
+Count instances time:  0.000697
+Count motifs time:  0.000182
+End-to-end Time:  0.001461
+010201 	 4 
+010202 	 2 
+011201 	 2 
+011202 	 1 
+012020 	 1 
+012120 	 2 

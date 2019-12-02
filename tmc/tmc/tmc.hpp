@@ -42,10 +42,9 @@ typedef int vertex;
 typedef int timestamp;
 typedef pair<vertex, vertex> edge;
 typedef pair<timestamp, edge> event;
-typedef vector<event> key;
-typedef pair<int, set<vertex>> counts;
-//typedef unordered_map<vector<event>, counts> instancemap;
-typedef unordered_map<vector<event>, pair<int, set<vertex>>> instancemap;
+typedef vector<event> key;  //a prefix or a motif
+typedef pair<int, set<vertex>> counts;  //the count of the (prefix/motif) and the vertices in the (prefix/motif)
+typedef unordered_map<vector<event>, pair<int, set<vertex>>> instancemap; //a hashtable of key and counts
 
 template <class T>
 inline void hash_combine(std::size_t & seed, const T & v)
@@ -71,13 +70,11 @@ namespace std
     {
         inline size_t operator()(const vector<pair<S, T>> &k) const
         {
-//            return hash_range(v.begin(),v.end());
             size_t seed = 0;
             for (auto it=k.begin(); it != k.end(); ++it) {
                 hash_combine(seed, it->first);
                 hash_combine(seed, it->second);
             }
-//            hash_range(seed, v.begin(),v.end());
             return seed;
         }
     };
@@ -88,8 +85,8 @@ inline void print_time (FILE* fp, const string& str, tms t) {
     fflush(fp);
 }
 
-void createEvents (string filename, vector<event>& events);
-void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);
-string encodeMotif(vector<event> instance);
+void createEvents (string filename, vector<event>& events); //Load and sort the event list
+void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
+string encodeMotif(vector<event> instance); //identify the type of motif
 
 #endif /* tmc_hpp */
