@@ -26,6 +26,7 @@ void createEvents (string filename, vector<event>& events){
         }
     }
     sort(events.begin(), events.end());
+    events.erase(unique(events.begin(), events.end()),events.end());
     return;
 }
 
@@ -42,11 +43,13 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
                 nodes.insert(v);
                 if (nodes.size() <= N_vtx) {    //check the number of vertices
                     if (imap[key].second.find(u)!=imap[key].second.end() || imap[key].second.find(v)!=imap[key].second.end()) {
-                        vector<event> motif = key;
-                        motif.push_back(e);
-                        new_motif.push_back(motif);
-                        imap[motif].first += imap[key].first;
-                        imap[motif].second = nodes;
+                        if (key.back().first!=e.first) {
+                            vector<event> motif = key;
+                            motif.push_back(e);
+                            new_motif.push_back(motif);
+                            imap[motif].first += imap[key].first;
+                            imap[motif].second = nodes;
+                        }
                     }
                 }
                 ++it;
