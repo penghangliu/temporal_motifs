@@ -44,6 +44,7 @@ typedef pair<vertex, vertex> edge;
 typedef pair<timestamp, edge> event;
 typedef vector<event> key;  //a prefix or a motif
 typedef pair<int, set<vertex>> counts;  //the count of the (prefix/motif) and the vertices in the (prefix/motif)
+//typedef unordered_map<vector<event>, set<vertex>> prefix;
 typedef unordered_map<vector<event>, pair<int, set<vertex>>> instancemap; //a hashtable of key and counts
 
 template <class T>
@@ -88,5 +89,7 @@ inline void print_time (FILE* fp, const string& str, tms t) {
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
 void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
 string encodeMotif(vector<event> instance); //identify the type of motif
+void countMotif (event e, vector<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w);
+set<vertex> getNodes(vector<event> key);
 
 #endif /* tmc_hpp */

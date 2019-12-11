@@ -32,26 +32,34 @@ int main(int argc, char * argv[]) {
     cout << "# of events: " << events.size() << endl;
     
 //Enumerate all instances that satisfy the given constrains(delta C, delta W, and motif size)
-    instancemap instances;
-    set<vector<event>> keys;
-    for (size_t i=0; i<events.size(); i++) {
-        countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w);
-    }
-    const auto t3 = chrono::steady_clock::now();
-    print_time (fp, "Count instances time: ", t3 - t2);
-    cout << "# of instances: " << instances.size() << endl;
+//    instancemap instances;
+//    set<vector<event>> keys;
+//    for (size_t i=0; i<events.size(); i++) {
+//        countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w);
+//    }
+//    const auto t3 = chrono::steady_clock::now();
+//    print_time (fp, "Count instances time: ", t3 - t2);
+//    cout << "# of instances: " << instances.size() << endl;
 
 //Classify instances to corresponding type of motif
+//    map<string, int> motif_count;
+//    for (auto it=instances.begin(); it!=instances.end(); ++it) {
+//        if (it->first.size()==N_event && it->second.second.size()==N_vtx) {
+//            string motif = encodeMotif(it->first);
+//            motif_count[motif] += it->second.first;
+//        }
+//    }
+    
+//Directly count motif from events stream
     map<string, int> motif_count;
-    for (auto it=instances.begin(); it!=instances.end(); ++it) {
-        if (it->first.size()==N_event && it->second.second.size()==N_vtx) {
-            string motif = encodeMotif(it->first);
-            motif_count[motif] += it->second.first;
-        }
+    vector<key> pre;
+    for (size_t i=0; i<events.size(); i++) {
+        countMotif(events[i], pre, motif_count, N_vtx, N_event, d_c, d_w);
     }
     
     const auto t4 = chrono::steady_clock::now();
-    print_time (fp, "Count motifs time: ", t4 - t3);
+    print_time (fp, "Count motifs time: ", t4 - t2);
+//    print_time (fp, "Count motifs time: ", t4 - t3);
     print_time (fp, "End-to-end Time: ", t4 - t1);
     
     for (auto it=motif_count.begin(); it!=motif_count.end(); ++it) {
