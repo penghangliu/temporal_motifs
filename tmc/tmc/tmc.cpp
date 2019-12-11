@@ -145,3 +145,39 @@ void countMotif (event e, vector<key>& pre, map<string, int>& motif_count, int N
     pre.push_back(E); // add the new event to the current prefix list
     return;
 }
+
+void countSpecificmotif (event e, vector<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w){
+    vector<vector<event>> new_motif;    //used to store the new motifs
+    for (auto it = pre.begin(); it != pre.end();) {   //for each current prefix
+        vector<event> key = *it;
+        if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c) {  //check delta C and delta W
+            if (key.back().first!=e.first) { //check synchronous events
+                vector<event> motif = key;
+                motif.push_back(e);
+                set<vertex> nodes = getNodes(motif);
+                string code = encodeMotif(motif);
+                int l = code.length();
+                if (code==code_given.substr(0,l)) {
+                    if (motif.size()==N_event && nodes.size()==N_vtx) {
+                        motif_count += 1;
+                    } else {
+                        new_motif.push_back(motif);
+                    }
+                }
+            }
+            ++it;
+        } else {
+            it = pre.erase(it);    //remove prefix if it exceeds the delat constrain
+        }
+    }
+    //add the new motifs to the current prefix list
+    if (!new_motif.empty()) {
+        for (vector<event> const &mt: new_motif) {
+            pre.push_back(mt);
+        }
+    }
+    vector<event> E;
+    E.push_back(e);
+    pre.push_back(E); // add the new event to the current prefix list
+    return;
+}

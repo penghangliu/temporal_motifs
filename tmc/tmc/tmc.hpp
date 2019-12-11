@@ -91,5 +91,6 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
 string encodeMotif(vector<event> instance); //identify the type of motif
 void countMotif (event e, vector<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w);
 set<vertex> getNodes(vector<event> key);
+void countSpecificmotif (event e, vector<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 
 #endif /* tmc_hpp */
