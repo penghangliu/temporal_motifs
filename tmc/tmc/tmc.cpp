@@ -57,7 +57,7 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
                 it = keys.erase(it);    //remove prefix if it exceeds the size constrain
             }
         } else {
-            it = keys.erase(it);    //remove prefix if it exceeds the delat constrain
+            it = keys.erase(it);    //remove prefix if it exceeds the delta constrain
         }
     }
     //add the new motifs to the current prefix list
@@ -113,25 +113,29 @@ void countMotif (event e, vector<key>& pre, map<string, int>& motif_count, int N
         vector<event> key = *it;
         set<vertex> nodes = getNodes(key);
         if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c) {  //check delta C and delta W
-            if (nodes.find(u)!=nodes.end() || nodes.find(v)!=nodes.end()) {
-            nodes.insert(u);
-            nodes.insert(v);
-                if (nodes.size() <= N_vtx) {    //check the number of vertices
-                    if (key.back().first!=e.first) { //check synchronous events
-                        vector<event> motif = key;
-                        motif.push_back(e);
-                        if (motif.size()==N_event && nodes.size()==N_vtx) {
-                            string code = encodeMotif(motif);
-                            motif_count[code] += 1;
-                        } else {
-                            new_motif.push_back(motif);
+            if (key.size()<N_event) {
+                if (nodes.find(u)!=nodes.end() || nodes.find(v)!=nodes.end()) {
+                    nodes.insert(u);
+                    nodes.insert(v);
+                    if (nodes.size() <= N_vtx) {    //check the number of vertices
+                        if (key.back().first!=e.first) { //check synchronous events
+                            vector<event> motif = key;
+                            motif.push_back(e);
+                            if (motif.size()==N_event && nodes.size()==N_vtx) {
+                                string code = encodeMotif(motif);
+                                motif_count[code] += 1;
+                            } else {
+                                new_motif.push_back(motif);
+                            }
                         }
                     }
                 }
+                ++it;
+            } else {
+                it = pre.erase(it);
             }
-            ++it;
         } else {
-            it = pre.erase(it);    //remove prefix if it exceeds the delat constrain
+            it = pre.erase(it);    //remove prefix if it exceeds the delta constrain
         }
     }
     //add the new motifs to the current prefix list
@@ -167,7 +171,7 @@ void countSpecificmotif (event e, vector<key>& pre, int& motif_count, string cod
             }
             ++it;
         } else {
-            it = pre.erase(it);    //remove prefix if it exceeds the delat constrain
+            it = pre.erase(it);    //remove prefix if it exceeds the delta constrain
         }
     }
     //add the new motifs to the current prefix list
