@@ -155,21 +155,25 @@ void countSpecificmotif (event e, vector<key>& pre, int& motif_count, string cod
     for (auto it = pre.begin(); it != pre.end();) {   //for each current prefix
         vector<event> key = *it;
         if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c) {  //check delta C and delta W
-            if (key.back().first!=e.first) { //check synchronous events
-                vector<event> motif = key;
-                motif.push_back(e);
-                set<vertex> nodes = getNodes(motif);
-                string code = encodeMotif(motif);
-                int l = code.length();
-                if (code==code_given.substr(0,l)) {
-                    if (motif.size()==N_event && nodes.size()==N_vtx) {
-                        motif_count += 1;
-                    } else {
-                        new_motif.push_back(motif);
+            if (key.size()<N_event) {
+                if (key.back().first!=e.first) { //check synchronous events
+                    vector<event> motif = key;
+                    motif.push_back(e);
+                    set<vertex> nodes = getNodes(motif);
+                    string code = encodeMotif(motif);
+                    int l = code.length();
+                    if (code==code_given.substr(0,l)) {
+                        if (motif.size()==N_event && nodes.size()==N_vtx) {
+                            motif_count += 1;
+                        } else {
+                            new_motif.push_back(motif);
+                        }
                     }
                 }
+                ++it;
+            } else {
+                it = pre.erase(it);
             }
-            ++it;
         } else {
             it = pre.erase(it);    //remove prefix if it exceeds the delta constrain
         }
