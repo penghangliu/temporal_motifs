@@ -73,7 +73,7 @@ int main(int argc, char * argv[]) {
         N_event=stoi(argv[6]);  //number of events in the motif
         //Directly count motif from events stream
         map<string, int> motif_count;
-        vector<key> pre;
+        set<key> pre;
         for (size_t i=0; i<events.size(); i++) {
             countMotif(events[i], pre, motif_count, N_vtx, N_event, d_c, d_w);
         }
@@ -103,7 +103,7 @@ int main(int argc, char * argv[]) {
         }
         N_vtx++;
         int motif_count;
-        vector<key> pre;
+        set<key> pre;
         for (size_t i=0; i<events.size(); i++) {
             countSpecificmotif (events[i], pre, motif_count, motif, N_vtx, N_event, d_c, d_w);
         }

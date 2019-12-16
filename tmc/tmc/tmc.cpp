@@ -105,7 +105,7 @@ set<vertex> getNodes(vector<event> key){
     return nodes;
 }
 
-void countMotif (event e, vector<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w){
+void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w){
     vertex u = e.second.first;
     vertex v = e.second.second;
     vector<vector<event>> new_motif;    //used to store the new motifs
@@ -137,16 +137,16 @@ void countMotif (event e, vector<key>& pre, map<string, int>& motif_count, int N
     //add the new motifs to the current prefix list
     if (!new_motif.empty()) {
         for (vector<event> const &mt: new_motif) {
-            pre.push_back(mt);
+            pre.insert(mt);
         }
     }
     vector<event> E;
     E.push_back(e);
-    pre.push_back(E); // add the new event to the current prefix list
+    pre.insert(E); // add the new event to the current prefix list
     return;
 }
 
-void countSpecificmotif (event e, vector<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w){
+void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w){
     vector<vector<event>> new_motif;    //used to store the new motifs
     for (auto it = pre.begin(); it != pre.end();) {   //for each current prefix
         vector<event> key = *it;
@@ -186,11 +186,11 @@ void countSpecificmotif (event e, vector<key>& pre, int& motif_count, string cod
     //add the new motifs to the current prefix list
     if (!new_motif.empty()) {
         for (vector<event> const &mt: new_motif) {
-            pre.push_back(mt);
+            pre.insert(mt);
         }
     }
     vector<event> E;
     E.push_back(e);
-    pre.push_back(E); // add the new event to the current prefix list
+    pre.insert(E); // add the new event to the current prefix list
     return;
 }
