@@ -79,9 +79,15 @@ string encodeMotif(vector<event> instance){
     string motif;
     map<vertex, string> code;
     int i=0;
+    unordered_map<timestamp, int> concurrent_count;
     for (auto it=instance.begin(); it!=instance.end(); ++it) {
         vertex u = it->second.first;
         vertex v = it->second.second;
+        timestamp t = it->first;
+        concurrent_count[t] += 1;
+        if (concurrent_count[t]==2) {
+            motif.append("a");
+        }
         if (code.find(u)==code.end()) {
             code[u] = to_string(i);
             i++;
@@ -92,8 +98,17 @@ string encodeMotif(vector<event> instance){
             i++;
         }
         motif.append(code[v]);
+        if (concurrent_count[t]>1) {
+            char c = sconvert(concurrent_count[t]);
+            motif.push_back(c);
+        }
     }
     return motif;
+}
+
+char sconvert (int i) {
+    string s("abcdefghijklmnopqrstuvwxyz");
+    return s.at(i-1);
 }
 
 set<vertex> getNodes(vector<event> key){
@@ -117,15 +132,13 @@ void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vt
                 nodes.insert(u);
                 nodes.insert(v);
                 if (nodes.size() <= N_vtx) {    //check the number of vertices
-                    if (key.back().first!=e.first) { //check synchronous events
-                        vector<event> motif = key;
-                        motif.push_back(e);
-                        if (motif.size()==N_event && nodes.size()==N_vtx) {
-                            string code = encodeMotif(motif);
-                            motif_count[code] += 1;
-                        } else if(motif.size()<N_event) {
-                            new_motif.push_back(motif);
-                        }
+                    vector<event> motif = key;
+                    motif.push_back(e);
+                    if (motif.size()==N_event && nodes.size()==N_vtx) {
+                        string code = encodeMotif(motif);
+                        motif_count[code] += 1;
+                    } else if(motif.size()<N_event) {
+                        new_motif.push_back(motif);
                     }
                 }
             }
@@ -151,32 +164,21 @@ void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_g
     for (auto it = pre.begin(); it != pre.end();) {   //for each current prefix
         vector<event> key = *it;
         if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c) {  //check delta C and delta W
-            if (key.back().first!=e.first) { //check synchronous events
-                vector<event> motif = key;
-                motif.push_back(e);
-                set<vertex> nodes = getNodes(motif);
-                if (motif.size()==N_event && nodes.size()==N_vtx) {
-                    string code = encodeMotif(motif);
-                    int l = code.length();
-                    if (code==code_given.substr(0,l)) {
-                        motif_count += 1;
-                    }
-                } else if(motif.size()<N_event) {
-                    string code = encodeMotif(motif);
-                    int l = code.length();
-                    if (code==code_given.substr(0,l)) {
-                        new_motif.push_back(motif);
-                    }
+            vector<event> motif = key;
+            motif.push_back(e);
+            set<vertex> nodes = getNodes(motif);
+            if (motif.size()==N_event && nodes.size()==N_vtx) {
+                string code = encodeMotif(motif);
+                int l = code.length();
+                if (code==code_given.substr(0,l)) {
+                    motif_count += 1;
                 }
-//                string code = encodeMotif(motif);
-//                int l = code.length();
-//                if (code==code_given.substr(0,l)) {
-//                    if (motif.size()==N_event && nodes.size()==N_vtx) {
-//                        motif_count += 1;
-//                    } else if(motif.size()<N_event) {
-//                        new_motif.push_back(motif);
-//                    }
-//                }
+            } else if(motif.size()<N_event) {
+                string code = encodeMotif(motif);
+                int l = code.length();
+                if (code==code_given.substr(0,l)) {
+                    new_motif.push_back(motif);
+                }
             }
             ++it;
         } else {

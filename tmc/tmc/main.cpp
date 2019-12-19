@@ -13,8 +13,8 @@ int main(int argc, char * argv[]) {
     const auto t1 = chrono::steady_clock::now();
     
     string method (argv[1]);
-    if (!(method == "v1" || method == "v2" || method == "v3")) {
-        printf ("Invalid algorithm, options are v1:naive, v2:speed up, v3:specific motif\n");
+    if (!(method == "v1" || method == "v2")) {
+        printf ("Invalid algorithm, options are v1:count all motifs for given size, v2:query a specific type of motif\n");
         exit(1);
     }
     
@@ -36,39 +36,39 @@ int main(int argc, char * argv[]) {
     print_time (fp, "Read data time: ", t2 - t1);
     cout << "# of events: " << events.size() << endl;
     
-    if (method=="v1") {
-        N_vtx=stoi(argv[5]);    //number of vertices in the motif
-        N_event=stoi(argv[6]);  //number of events in the motif
-        //Enumerate all instances that satisfy the given constrains(delta C, delta W, and motif size)
-        instancemap instances;
-        set<vector<event>> keys;
-        for (size_t i=0; i<events.size(); i++) {
-            countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w);
-        }
-        const auto t3 = chrono::steady_clock::now();
-        print_time (fp, "Count instances time: ", t3 - t2);
-        cout << "# of instances: " << instances.size() << endl;
-        
-        //Classify instances to corresponding type of motif
-        map<string, int> motif_count;
-        for (auto it=instances.begin(); it!=instances.end(); ++it) {
-            if (it->first.size()==N_event && it->second.second.size()==N_vtx) {
-                string motif = encodeMotif(it->first);
-                motif_count[motif] += it->second.first;
-            }
-        }
-        
-        const auto t4 = chrono::steady_clock::now();
-        print_time (fp, "Count motifs time: ", t4 - t3);
-        print_time (fp, "End-to-end Time: ", t4 - t1);
-        
-        for (auto it=motif_count.begin(); it!=motif_count.end(); ++it) {
-            fprintf(fp, "%s \t %d \n", (*it).first.c_str(), (*it).second);
-        }
-        fclose (fp);
-    }
+//    if (method=="v1") {
+//        N_vtx=stoi(argv[5]);    //number of vertices in the motif
+//        N_event=stoi(argv[6]);  //number of events in the motif
+//        //Enumerate all instances that satisfy the given constrains(delta C, delta W, and motif size)
+//        instancemap instances;
+//        set<vector<event>> keys;
+//        for (size_t i=0; i<events.size(); i++) {
+//            countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w);
+//        }
+//        const auto t3 = chrono::steady_clock::now();
+//        print_time (fp, "Count instances time: ", t3 - t2);
+//        cout << "# of instances: " << instances.size() << endl;
+//
+//        //Classify instances to corresponding type of motif
+//        map<string, int> motif_count;
+//        for (auto it=instances.begin(); it!=instances.end(); ++it) {
+//            if (it->first.size()==N_event && it->second.second.size()==N_vtx) {
+//                string motif = encodeMotif(it->first);
+//                motif_count[motif] += it->second.first;
+//            }
+//        }
+//
+//        const auto t4 = chrono::steady_clock::now();
+//        print_time (fp, "Count motifs time: ", t4 - t3);
+//        print_time (fp, "End-to-end Time: ", t4 - t1);
+//
+//        for (auto it=motif_count.begin(); it!=motif_count.end(); ++it) {
+//            fprintf(fp, "%s \t %d \n", (*it).first.c_str(), (*it).second);
+//        }
+//        fclose (fp);
+//    }
     
-    if (method=="v2") {
+    if (method=="v1") {
         N_vtx=stoi(argv[5]);    //number of vertices in the motif
         N_event=stoi(argv[6]);  //number of events in the motif
         //Directly count motif from events stream
@@ -88,17 +88,23 @@ int main(int argc, char * argv[]) {
         fclose (fp);
     }
     
-    if (method=="v3") {
+    if (method=="v2") {
         string motif (argv[5]);
-        int l = motif.length();
+        string edges;
+        for (int i=0; i<motif.size(); i++) {
+            if (motif[i]>='0'&&motif[i]<='9') {
+                edges.push_back(motif[i]);
+            }
+        }
+        int l = edges.length();
         if (l%2!=0) {
             printf ("Invalid input, input example: 011202\n");
             exit(1);
         }
         N_event = l/2;
         N_vtx = 0;
-        for (int i=0; i<motif.length(); i++) {
-            int a = motif[i] - '0';
+        for (int i=0; i<edges.length(); i++) {
+            int a = edges[i] - '0';
             N_vtx = max(a, N_vtx);
         }
         N_vtx++;
