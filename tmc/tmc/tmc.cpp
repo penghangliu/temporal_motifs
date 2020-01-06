@@ -77,34 +77,74 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
 
 string encodeMotif(vector<event> instance){
     string motif;
+    string temp;
+    bool concurrent {false};
+    timestamp t0 = instance[0].first - 1;
     map<vertex, string> code;
     int i=0;
-    unordered_map<timestamp, int> concurrent_count;
     for (auto it=instance.begin(); it!=instance.end(); ++it) {
         vertex u = it->second.first;
         vertex v = it->second.second;
         timestamp t = it->first;
-        concurrent_count[t] += 1;
-        if (concurrent_count[t]==2) {
-            motif.append("a");
+        if (t==t0) {
+            motif.append("{");
+            concurrent = true;
         }
+        motif.append(temp);
+        temp.clear();
+        if (t!=t0&&concurrent){
+            motif.append("}");
+            concurrent = false;
+        }
+        t0 = t;
         if (code.find(u)==code.end()) {
             code[u] = to_string(i);
             i++;
         }
-        motif.append(code[u]);
+        temp.append(code[u]);
         if (code.find(v)==code.end()) {
             code[v] = to_string(i);
             i++;
         }
-        motif.append(code[v]);
-        if (concurrent_count[t]>1) {
-            char c = sconvert(concurrent_count[t]);
-            motif.push_back(c);
-        }
+        temp.append(code[v]);
+    }
+    motif.append(temp);
+    if (concurrent) {
+        motif.append("}");
     }
     return motif;
 }
+
+//string encodeMotif(vector<event> instance){
+//    string motif;
+//    map<vertex, string> code;
+//    int i=0;
+//    unordered_map<timestamp, int> concurrent_count;
+//    for (auto it=instance.begin(); it!=instance.end(); ++it) {
+//        vertex u = it->second.first;
+//        vertex v = it->second.second;
+//        timestamp t = it->first;
+//        concurrent_count[t] += 1;
+//        if (concurrent_count[t]==2) {
+//            motif.append("a");
+//        }
+//        if (code.find(u)==code.end()) {
+//            code[u] = to_string(i);
+//            i++;
+//        }
+//        motif.append(code[u]);
+//        if (code.find(v)==code.end()) {
+//            code[v] = to_string(i);
+//            i++;
+//        }
+//        motif.append(code[v]);
+//        if (concurrent_count[t]>1) {
+//            char c = sconvert(concurrent_count[t]);
+//            motif.push_back(c);
+//        }
+//    }
+//    return motif;
+//}
 
 char sconvert (int i) {
     string s("abcdefghijklmnopqrstuvwxyz");
