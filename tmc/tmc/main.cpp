@@ -23,7 +23,12 @@ int main(int argc, char * argv[]) {
     int d_c=stoi(argv[3]);      //delta C
     int d_w=stoi(argv[4]);      //delta W
     int N_vtx, N_event;
-    string out_file = "out_" + method + "_" + gname;
+    string out_file;
+    if (method=="v1") {
+        out_file = "out_" + method + "_" + gname + "_" + argv[5] + "_" + argv[6];
+    } else if (method=="v2"){
+        out_file = "out_" + method + "_" + gname + "_" + argv[5];
+    }
     FILE* fp = fopen (out_file.c_str(), "w");
     
     cout << "delta W: " << d_w << endl;
@@ -77,6 +82,7 @@ int main(int argc, char * argv[]) {
         for (size_t i=0; i<events.size(); i++) {
             countMotif(events[i], pre, motif_count, N_vtx, N_event, d_c, d_w);
         }
+        removeIsomorphic(motif_count);
         
         const auto t4 = chrono::steady_clock::now();
         print_time (fp, "Count motifs time: ", t4 - t2);
