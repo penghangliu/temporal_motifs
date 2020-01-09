@@ -25,9 +25,9 @@ int main(int argc, char * argv[]) {
     int N_vtx, N_event;
     string out_file;
     if (method=="v1") {
-        out_file = "out_" + method + "_" + gname + "_" + argv[5] + "_" + argv[6];
+        out_file = "out_" + method + "_" + argv[3] + "_" + argv[4] + "_" + argv[5] + "_" + argv[6] + "_" + gname;
     } else if (method=="v2"){
-        out_file = "out_" + method + "_" + gname + "_" + argv[5];
+        out_file = "out_" + method + "_" + argv[3] + "_" + argv[4] + "_" + argv[5] + "_" + gname;
     }
     FILE* fp = fopen (out_file.c_str(), "w");
     
