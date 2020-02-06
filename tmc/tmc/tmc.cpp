@@ -30,7 +30,7 @@ void createEvents (string filename, vector<event>& events){
     return;
 }
 
-void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w){
+void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w, string consecutive){
     vertex u = e.second.first;
     vertex v = e.second.second;
     vector<vector<event>> new_motif;    //used to store the new motifs
@@ -51,6 +51,10 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
                             imap[motif].second = nodes;
                         }
                     }
+                }
+                if (consecutive == "YES") {
+                    it = keys.erase(it);
+                    continue;
                 }
                 ++it;
             } else {

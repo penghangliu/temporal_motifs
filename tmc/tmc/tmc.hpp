@@ -87,7 +87,7 @@ inline void print_time (FILE* fp, const string& str, tms t) {
 }
 
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
-void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
+void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w, string consecutive);    //Increment the instance count and update the prefix type
 string encodeMotif(vector<event> instance); //identify the type of motif
 void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w);
 set<vertex> getNodes(vector<event> key);

@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
 	const auto t1 = chrono::steady_clock::now();
 
 	string method (argv[1]);
-	if (!(method == "v1" || method == "v2")) {
+	if (!(method == "v1" || method == "v2" || method == "v3")) {
 		printf ("Invalid algorithm, options are v1:count all motifs for given size, v2:query a specific type of motif\n");
 		exit(1);
 	}
@@ -45,11 +45,12 @@ int main(int argc, char * argv[]) {
 	if (method=="v1") {
 		N_vtx=stoi(argv[5]);    //number of vertices in the motif
 		N_event=stoi(argv[6]);  //number of events in the motif
+        string consecutive (argv[7]);
 		//Enumerate all instances that satisfy the given constrains(delta C, delta W, and motif size)
 		instancemap instances;
 		set<vector<event>> keys;
 		for (size_t i=0; i<events.size(); i++) {
-			countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w);
+			countInstance(events[i], instances, keys, N_vtx, N_event, d_c, d_w, consecutive);
 		}
 
 		const auto t3 = chrono::steady_clock::now();
@@ -58,23 +59,24 @@ int main(int argc, char * argv[]) {
 
 		//Classify instances to corresponding type of motif
 		map<string, int> motif_count;
+        string out_file1 = out_file + "_list";
+        FILE* fp1 = fopen(out_file1.c_str(), "w");
 		for (auto it=instances.begin(); it!=instances.end(); ++it) {
 			if (it->first.size()==N_event && it->second.second.size()==N_vtx) {
 				string motif = encodeMotif(it->first);
 				vector<event> motif_events = it->first;
 
-
 				// Only consider delta_C
 				if (N_event == 3) {
 					int second_event_percentile = 100 * ((double) (motif_events[1].first - motif_events[0].first) / (motif_events[2].first - motif_events[0].first));
-					fprintf (fp, "%s %d %d %d perc dc: %d\n", motif.c_str(), 0, second_event_percentile, 100, d_c);
-					fprintf (fp, "%s %d span dc: %d\n", motif.c_str(), (motif_events[2].first - motif_events[0].first), d_c);
+					fprintf (fp1, "%s %d %d %d perc dc: %d\n", motif.c_str(), 0, second_event_percentile, 100, d_c);
+					fprintf (fp1, "%s %d span dc: %d\n", motif.c_str(), (motif_events[2].first - motif_events[0].first), d_c);
 				}
 				if (N_event == 4) {
 					int second_event_percentile = 100 * ((double) (motif_events[1].first - motif_events[0].first) / (motif_events[3].first - motif_events[0].first));
 					int third_event_percentile = 100 * ((double) (motif_events[2].first - motif_events[0].first) / (motif_events[3].first - motif_events[0].first));
-					fprintf (fp, "%s %d %d %d %d perc dc: %d\n", motif.c_str(), 0, second_event_percentile, third_event_percentile, 100, d_c);
-					fprintf (fp, "%s %d span dc: %d\n", motif.c_str(), (motif_events[3].first - motif_events[0].first), d_c);
+					fprintf (fp1, "%s %d %d %d %d perc dc: %d\n", motif.c_str(), 0, second_event_percentile, third_event_percentile, 100, d_c);
+					fprintf (fp1, "%s %d span dc: %d\n", motif.c_str(), (motif_events[3].first - motif_events[0].first), d_c);
 				}
 				motif_count[motif] += it->second.first;
 			}
