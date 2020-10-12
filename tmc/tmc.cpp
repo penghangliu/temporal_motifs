@@ -236,3 +236,8 @@ void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_g
     pre.insert(E); // add the new event to the current prefix list
     return;
 }
+
+void removeIsomorphic (map<string, int>& motif_count){
+    
+    return;
+}

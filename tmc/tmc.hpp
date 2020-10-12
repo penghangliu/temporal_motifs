@@ -93,4 +93,5 @@ void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vt
 set<vertex> getNodes(vector<event> key);
 void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 char sconvert (int i);
+void removeIsomorphic (map<string, int>& motif_count);
 #endif /* tmc_hpp */
