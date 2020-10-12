@@ -46,6 +46,8 @@ typedef vector<event> key;  //a prefix or a motif
 typedef pair<int, set<vertex>> counts;  //the count of the (prefix/motif) and the vertices in the (prefix/motif)
 //typedef unordered_map<vector<event>, set<vertex>> prefix;
 typedef unordered_map<vector<event>, pair<int, set<vertex>>> instancemap; //a hashtable of key and counts
+typedef unordered_map<edge, vector<timestamp>> TGraph; //temporal graph
+typedef unordered_map<vertex, set<edge>> adj_edges;
 
 template <class T>
 inline void hash_combine(std::size_t & seed, const T & v)
@@ -86,6 +88,9 @@ inline void print_time (FILE* fp, const string& str, tms t) {
     fflush(fp);
 }
 
+string easyEncode(edge a, edge b, edge c);
+bool checkConnect(edge a, edge b, edge e);
+void createGraph (string filename, TGraph& graph, adj_edges& AE);
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
 void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
 string encodeMotif(vector<event> instance); //identify the type of motif
@@ -94,4 +99,5 @@ set<vertex> getNodes(vector<event> key);
 void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 char sconvert (int i);
 void removeIsomorphic (map<string, int>& motif_count);
+void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count);
 #endif /* tmc_hpp */

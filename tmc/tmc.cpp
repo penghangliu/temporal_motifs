@@ -8,6 +8,112 @@
 
 #include "tmc.hpp"
 
+void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count){
+    for (auto it=graph.begin(); it!=graph.end(); ++it) {
+        edge e = it->first;
+        vector<timestamp> Tm = it->second;
+        vertex u = e.first;
+        vertex v = e.second;
+        set<edge> edges(AE[u]);
+        edges.insert(AE[v].begin(), AE[v].end());
+        
+        for (auto ap=edges.begin(); ap!=edges.end(); ++ap) {
+            for (auto bp=ap; bp!=edges.end(); ++bp) {
+                edge a = *ap;
+                edge b = *bp;
+                if(!checkConnect(a, b, e)) continue;
+                vector<timestamp> Ta = graph[a];
+                vector<timestamp> Tb = graph[b];
+                string s1 = easyEncode(a, e, b);
+                string s2 = easyEncode(b, e, a);
+//                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " " << s1 << " " << s2 << " ";
+                for (int j=0; j<Tm.size(); j++) {
+                    for (int i=0; i<Ta.size(); i++) {
+                        if(abs(Ta[i]-Tm[j])>d_c) continue;
+                        for (int k=0; k<Tb.size(); k++) {
+                            if(abs(Tb[k]-Tm[j])>d_c) continue;
+                            if(abs(Ta[i]-Tb[k])>d_w) continue;
+                            if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
+                                motif_count[s1] += 1;
+//                                cout << "+1" << " ";
+//                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
+                            }
+                            if(a.first==b.first && a.second==b.second) continue;
+                            if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
+                                motif_count[s2] += 1;
+//                                cout << "+2" << " ";
+//                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
+                            }
+                        }
+                    }
+                }
+//                cout << endl;
+            }
+        }
+    }
+    return;
+}
+
+string easyEncode(edge a, edge b, edge c){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+    temp.push_back(c.first);
+    temp.push_back(c.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    return motif;
+}
+
+bool checkConnect(edge a, edge b, edge e){
+    set<vertex> V;
+    V.insert(a.first);
+    V.insert(a.second);
+    V.insert(b.first);
+    V.insert(b.second);
+    V.insert(e.first);
+    V.insert(e.second);
+    if (V.size()>3) {
+        return false;
+    }
+    return true;
+}
+
+void createGraph (string filename, TGraph& graph, adj_edges& AE){
+    ifstream in(filename);
+    string line;
+    
+    while (getline(in, line)) {
+        if (line[0] != '%' && line[0] != '#'){
+            stringstream ss (line);
+            vertex u, v;
+            timestamp t;
+            edge e;
+            ss >> u >> v >> t;
+            if (u != v) {
+                e = make_pair(u, v);
+                graph[e].push_back(t);
+                AE[u].insert(e);
+                AE[v].insert(e);
+            }
+        }
+    }
+    for (auto it=graph.begin(); it!=graph.end(); ++it) {
+        sort(it->second.begin(), it->second.end());
+        it->second.erase(unique(it->second.begin(), it->second.end()),it->second.end());
+    }
+    return;
+}
+
 void createEvents (string filename, vector<event>& events){
     ifstream in(filename);
     string line;
