@@ -88,6 +88,8 @@ inline void print_time (FILE* fp, const string& str, tms t) {
     fflush(fp);
 }
 
+int n_larger_eq(vector<timestamp> T, timestamp t);
+int n_less_eq(vector<timestamp> T, timestamp t);
 string easyEncode(edge a, edge b, edge c);
 bool checkConnect(edge a, edge b, edge e);
 void createGraph (string filename, TGraph& graph, adj_edges& AE);

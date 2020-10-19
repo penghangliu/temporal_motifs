@@ -16,7 +16,7 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
         vertex v = e.second;
         set<edge> edges(AE[u]);
         edges.insert(AE[v].begin(), AE[v].end());
-        
+
         for (auto ap=edges.begin(); ap!=edges.end(); ++ap) {
             for (auto bp=ap; bp!=edges.end(); ++bp) {
                 edge a = *ap;
@@ -26,25 +26,40 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                 vector<timestamp> Tb = graph[b];
                 string s1 = easyEncode(a, e, b);
                 string s2 = easyEncode(b, e, a);
-//                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " " << s1 << " " << s2 << " ";
+//                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " ";
                 for (int j=0; j<Tm.size(); j++) {
                     for (int i=0; i<Ta.size(); i++) {
                         if(abs(Ta[i]-Tm[j])>d_c) continue;
-                        for (int k=0; k<Tb.size(); k++) {
-                            if(abs(Tb[k]-Tm[j])>d_c) continue;
-                            if(abs(Ta[i]-Tb[k])>d_w) continue;
-                            if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
-                                motif_count[s1] += 1;
-//                                cout << "+1" << " ";
-//                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
-                            }
-                            if(a.first==b.first && a.second==b.second) continue;
-                            if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
-                                motif_count[s2] += 1;
-//                                cout << "+2" << " ";
-//                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
-                            }
+                        //binary search
+                        if (Ta[i] > Tm[j]) {
+                            timestamp upper = Tm[j];
+                            timestamp lower = max(Ta[i]-d_w, Tm[j]-d_c);
+                            int temp_count = n_larger_eq(Tb, lower);
+                            temp_count -= n_larger_eq(Tb, upper);
+//                            cout << s2 << " " << temp_count << " ";
+                            if(temp_count>0) motif_count[s2] += temp_count;
+                        } else if (Ta[i] < Tm[j] && (a.first!=b.first || a.second!=b.second)){
+                            timestamp lower = Tm[j];
+                            timestamp upper = min(Ta[i]+d_w, Tm[j]+d_c);
+                            int temp_count = n_less_eq(Tb, upper);
+                            temp_count -= n_less_eq(Tb, lower);
+//                            cout << s1 << " " << temp_count << " ";
+                            if(temp_count>0) motif_count[s1] += temp_count;
                         }
+                        //original
+//                        for (int k=0; k<Tb.size(); k++) {
+//                            if(abs(Tb[k]-Tm[j])>d_c) continue;
+//                            if(abs(Ta[i]-Tb[k])>d_w) continue;
+//                            if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
+//                                motif_count[s1] += 1;
+////                                cout << "+1" << " ";
+////                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
+//                            } else if (Ta[i] > Tm[j] && Tm[j] > Tb[k] && (a.first!=b.first || a.second!=b.second)) {
+//                                motif_count[s2] += 1;
+////                                cout << "+2" << " ";
+////                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
+//                            }
+//                        }
                     }
                 }
 //                cout << endl;
@@ -52,6 +67,44 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
         }
     }
     return;
+}
+
+int n_larger_eq(vector<timestamp> T, timestamp t){
+    int l=0;
+    int n=T.size();
+    int r=n-1;
+    int output = n;
+    while (l<=r) {
+        int m = (l + r) / 2;
+        if (T[m]>t) {
+            output = r;
+            r = m - 1;
+        } else if (T[m]<t){
+            l = m + 1;
+        } else{
+            return n-m;
+        }
+    }
+    return n-output;
+}
+
+int n_less_eq(vector<timestamp> T, timestamp t){
+    int l=0;
+    int n=T.size();
+    int r=n-1;
+    int output = 0;
+    while (l<=r) {
+        int m = (l + r) / 2;
+        if (T[m]>t) {
+            r = m - 1;
+        } else if (T[m]<t){
+            output = l+1;
+            l = m + 1;
+        } else{
+            return m+1;
+        }
+    }
+    return output;
 }
 
 string easyEncode(edge a, edge b, edge c){
