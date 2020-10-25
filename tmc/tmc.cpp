@@ -9,7 +9,7 @@
 #include "tmc.hpp"
 
 void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count){
-    for (auto it=graph.begin(); it!=graph.end(); ++it) {
+    for (auto it=graph.begin(); it!=graph.end(); ++it) { // second edge
         edge e = it->first;
         vector<timestamp> Tm = it->second;
         vertex u = e.first;
@@ -17,14 +17,18 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
         set<edge> edges(AE[u]);
         edges.insert(AE[v].begin(), AE[v].end());
 
-        for (auto ap=edges.begin(); ap!=edges.end(); ++ap) {
-            for (auto bp=ap; bp!=edges.end(); ++bp) {
-                edge a = *ap;
+        for (auto ap=edges.begin(); ap!=edges.end(); ++ap) { // first edge
+            edge a = *ap;
+            set<vertex> nodes = get_Nodes(a, e);
+            set<edge> third = nodes.size()==2 ? edges : get_third(AE, nodes);
+//            cout << a.first << a.second << " " << e.first << e.second << " " << third.size() << " ";
+            for (auto bp=third.begin(); bp!=third.end(); ++bp) { // third edge
                 edge b = *bp;
-                if(!checkConnect(a, b, e)) continue;
+//                cout << b.first << b.second << ": ";
+//                if(!checkConnect(a, b, e)) continue;
                 vector<timestamp> Ta = graph[a];
                 vector<timestamp> Tb = graph[b];
-                string s1 = easyEncode(a, e, b);
+//                string s1 = easyEncode(a, e, b);
                 string s2 = easyEncode(b, e, a);
 //                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " ";
                 for (int j=0; j<Tm.size(); j++) {
@@ -38,14 +42,15 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                             temp_count -= n_larger_eq(Tb, upper);
 //                            cout << s2 << " " << temp_count << " ";
                             if(temp_count>0) motif_count[s2] += temp_count;
-                        } else if (Ta[i] < Tm[j] && (a.first!=b.first || a.second!=b.second)){
-                            timestamp lower = Tm[j];
-                            timestamp upper = min(Ta[i]+d_w, Tm[j]+d_c);
-                            int temp_count = n_less_eq(Tb, upper);
-                            temp_count -= n_less_eq(Tb, lower);
-//                            cout << s1 << " " << temp_count << " ";
-                            if(temp_count>0) motif_count[s1] += temp_count;
                         }
+//                        else if (Ta[i] < Tm[j] && (a.first!=b.first || a.second!=b.second)){
+//                            timestamp lower = Tm[j];
+//                            timestamp upper = min(Ta[i]+d_w, Tm[j]+d_c);
+//                            int temp_count = n_less_eq(Tb, upper);
+//                            temp_count -= n_less_eq(Tb, lower);
+//                            cout << s1 << " " << temp_count << " ";
+//                            if(temp_count>0) motif_count[s1] += temp_count;
+//                        }
                         //original
 //                        for (int k=0; k<Tb.size(); k++) {
 //                            if(abs(Tb[k]-Tm[j])>d_c) continue;
@@ -64,9 +69,35 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                 }
 //                cout << endl;
             }
+//            cout << endl;
         }
     }
     return;
+}
+
+set<edge> get_third(adj_edges AE, set<vertex> nodes){
+    set<edge> output;
+    for (auto it=nodes.begin(); it!=nodes.end(); ++it) {
+        auto itt=it;
+        itt++;
+        while (itt!=nodes.end()) {
+            edge a = make_pair(*it, *itt);
+            edge b = make_pair(*itt, *it);
+            if(AE[*it].find(a)!=AE[*it].end()) output.insert(a);
+            if(AE[*it].find(b)!=AE[*it].end()) output.insert(b);
+            itt++;
+        }
+    }
+    return output;
+}
+
+set<vertex> get_Nodes(edge a, edge b){
+    set<vertex> nodes;
+    nodes.insert(a.first);
+    nodes.insert(a.second);
+    nodes.insert(b.first);
+    nodes.insert(b.second);
+    return nodes;
 }
 
 int n_larger_eq(vector<timestamp> T, timestamp t){
