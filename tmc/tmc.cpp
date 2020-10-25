@@ -19,61 +19,95 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
 
         for (auto ap=edges.begin(); ap!=edges.end(); ++ap) { // first edge
             edge a = *ap;
-            set<vertex> nodes = get_Nodes(a, e);
-            set<edge> third = nodes.size()==2 ? edges : get_third(AE, nodes);
-//            cout << a.first << a.second << " " << e.first << e.second << " " << third.size() << " ";
-            for (auto bp=third.begin(); bp!=third.end(); ++bp) { // third edge
-                edge b = *bp;
-//                cout << b.first << b.second << ": ";
-//                if(!checkConnect(a, b, e)) continue;
-                if(graph.find(b)==graph.end()) continue;
-                vector<timestamp> Ta = graph[a];
-                vector<timestamp> Tb = graph[b];
-//                string s1 = easyEncode(a, e, b);
-                string s2 = easyEncode(b, e, a);
-//                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " ";
-                for (int j=0; j<Tm.size(); j++) {
-                    for (int i=0; i<Ta.size(); i++) {
-                        if(abs(Ta[i]-Tm[j])>d_c) continue;
-                        //binary search
-                        if (Ta[i] > Tm[j]) {
-                            timestamp upper = Tm[j];
-                            timestamp lower = max(Ta[i]-d_w, Tm[j]-d_c);
-                            int temp_count = n_larger_eq(Tb, lower);
-                            temp_count -= n_larger_eq(Tb, upper);
-//                            cout << s2 << " " << temp_count << " ";
-                            if(temp_count>0) motif_count[s2] += temp_count;
-                        }
-//                        else if (Ta[i] < Tm[j] && (a.first!=b.first || a.second!=b.second)){
-//                            timestamp lower = Tm[j];
-//                            timestamp upper = min(Ta[i]+d_w, Tm[j]+d_c);
-//                            int temp_count = n_less_eq(Tb, upper);
-//                            temp_count -= n_less_eq(Tb, lower);
-//                            cout << s1 << " " << temp_count << " ";
-//                            if(temp_count>0) motif_count[s1] += temp_count;
-//                        }
-                        //original
-//                        for (int k=0; k<Tb.size(); k++) {
-//                            if(abs(Tb[k]-Tm[j])>d_c) continue;
-//                            if(abs(Ta[i]-Tb[k])>d_w) continue;
-//                            if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
-//                                motif_count[s1] += 1;
-////                                cout << "+1" << " ";
-////                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
-//                            } else if (Ta[i] > Tm[j] && Tm[j] > Tb[k] && (a.first!=b.first || a.second!=b.second)) {
-//                                motif_count[s2] += 1;
-////                                cout << "+2" << " ";
-////                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
-//                            }
-//                        }
-                    }
+            if ((a.first==e.first && a.second==e.second)||(a.first==e.second && a.second==e.first)) {
+                for (auto bp=edges.begin(); bp!=edges.end(); ++bp) { // third edge
+                    edge b = *bp;
+                    Tcount(a, e, b, graph, d_c, d_w, motif_count);
                 }
-//                cout << endl;
             }
+            else {
+                set<vertex> nodes = get_Nodes(a, e);
+                set<edge> third = get_third(AE, nodes);
+                for (auto bp=third.begin(); bp!=third.end(); ++bp) { // third edge
+                    edge b = *bp;
+                    if(graph.find(b)==graph.end()) continue;
+                    Tcount(a, e, b, graph, d_c, d_w, motif_count);
+                }
+            }
+//            set<vertex> nodes = get_Nodes(a, e);
+//            set<edge> third = nodes.size()==2 ? edges : get_third(AE, nodes);
+////            cout << a.first << a.second << " " << e.first << e.second << " " << third.size() << " ";
+//            for (auto bp=third.begin(); bp!=third.end(); ++bp) { // third edge
+//                edge b = *bp;
+////                cout << b.first << b.second << ": ";
+////                if(!checkConnect(a, b, e)) continue;
+//                if(graph.find(b)==graph.end()) continue;
+//                vector<timestamp> Ta = graph[a];
+//                vector<timestamp> Tb = graph[b];
+////                string s1 = easyEncode(a, e, b);
+//                string s2 = easyEncode(b, e, a);
+////                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " ";
+//                for (int j=0; j<Tm.size(); j++) {
+//                    for (int i=0; i<Ta.size(); i++) {
+//                        if(abs(Ta[i]-Tm[j])>d_c) continue;
+//                        //binary search
+//                        if (Ta[i] > Tm[j]) {
+//                            timestamp upper = Tm[j];
+//                            timestamp lower = max(Ta[i]-d_w, Tm[j]-d_c);
+//                            int temp_count = n_larger_eq(Tb, lower);
+//                            temp_count -= n_larger_eq(Tb, upper);
+////                            cout << s2 << " " << temp_count << " ";
+//                            if(temp_count>0) motif_count[s2] += temp_count;
+//                        }
+////                        else if (Ta[i] < Tm[j] && (a.first!=b.first || a.second!=b.second)){
+////                            timestamp lower = Tm[j];
+////                            timestamp upper = min(Ta[i]+d_w, Tm[j]+d_c);
+////                            int temp_count = n_less_eq(Tb, upper);
+////                            temp_count -= n_less_eq(Tb, lower);
+////                            cout << s1 << " " << temp_count << " ";
+////                            if(temp_count>0) motif_count[s1] += temp_count;
+////                        }
+//                        //original
+////                        for (int k=0; k<Tb.size(); k++) {
+////                            if(abs(Tb[k]-Tm[j])>d_c) continue;
+////                            if(abs(Ta[i]-Tb[k])>d_w) continue;
+////                            if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
+////                                motif_count[s1] += 1;
+//////                                cout << "+1" << " ";
+//////                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
+////                            } else if (Ta[i] > Tm[j] && Tm[j] > Tb[k] && (a.first!=b.first || a.second!=b.second)) {
+////                                motif_count[s2] += 1;
+//////                                cout << "+2" << " ";
+//////                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
+////                            }
+////                        }
+//                    }
+//                }
+////                cout << endl;
+//            }
 //            cout << endl;
         }
     }
     return;
+}
+
+void Tcount(edge a, edge b, edge c, TGraph graph, int d_c, int d_w, map<string, int>&  motif_count){
+    vector<timestamp> Ta = graph[a];
+    vector<timestamp> Tb = graph[b];
+    vector<timestamp> Tc = graph[c];
+    string s = easyEncode(a, b, c);
+    for (int j=0; j<Tb.size(); j++) {
+        for (int i=0; i<Ta.size(); i++) {
+            if(abs(Ta[i]-Tb[j])>d_c) continue;
+            for (int k=0; k<Tc.size(); k++) {
+                if(abs(Tc[k]-Tb[j])>d_c) continue;
+                if(abs(Ta[i]-Tc[k])>d_w) continue;
+                if(Ta[i] < Tb[j] && Tb[j] < Tc[k]){
+                    motif_count[s] += 1;
+                }
+            }
+        }
+    }
 }
 
 set<edge> get_third(adj_edges AE, set<vertex> nodes){

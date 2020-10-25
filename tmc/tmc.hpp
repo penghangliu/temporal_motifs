@@ -104,4 +104,5 @@ void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_g
 char sconvert (int i);
 void removeIsomorphic (map<string, int>& motif_count);
 void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count);
+void Tcount(edge a, edge b, edge c, TGraph graph, int d_c, int d_w, map<string, int>&  motif_count);
 #endif /* tmc_hpp */
