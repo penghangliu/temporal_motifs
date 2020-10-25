@@ -26,7 +26,7 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                 edge b = *bp;
 //                cout << b.first << b.second << ": ";
 //                if(!checkConnect(a, b, e)) continue;
-                if(graph.find(b)==graph.end()) continue;;
+                if(graph.find(b)==graph.end()) continue;
                 vector<timestamp> Ta = graph[a];
                 vector<timestamp> Tb = graph[b];
 //                string s1 = easyEncode(a, e, b);
