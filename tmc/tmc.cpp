@@ -26,6 +26,7 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                 edge b = *bp;
 //                cout << b.first << b.second << ": ";
 //                if(!checkConnect(a, b, e)) continue;
+                if(graph.find(b)==graph.end()) continue;;
                 vector<timestamp> Ta = graph[a];
                 vector<timestamp> Tb = graph[b];
 //                string s1 = easyEncode(a, e, b);
@@ -83,8 +84,10 @@ set<edge> get_third(adj_edges AE, set<vertex> nodes){
         while (itt!=nodes.end()) {
             edge a = make_pair(*it, *itt);
             edge b = make_pair(*itt, *it);
-            if(AE[*it].find(a)!=AE[*it].end()) output.insert(a);
-            if(AE[*it].find(b)!=AE[*it].end()) output.insert(b);
+//            if(AE[*it].find(a)!=AE[*it].end()) output.insert(a);
+//            if(AE[*it].find(b)!=AE[*it].end()) output.insert(b);
+            output.insert(a);
+            output.insert(b);
             itt++;
         }
     }
