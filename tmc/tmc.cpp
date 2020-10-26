@@ -35,12 +35,18 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                             if(abs(Ta[i]-Tb[k])>d_w) continue;
                             if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
                                 motif_count[s1] += 1;
+                                if (s1=="011220") {
+                                    cout << a.first << " " << e.first << " " << b.first << endl;
+                                }
 //                                cout << "+1" << " ";
 //                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
                             }
                             if(a.first==b.first && a.second==b.second) continue;
                             if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
                                 motif_count[s2] += 1;
+                                if (s2=="011220") {
+                                    cout << b.first << " " << e.first << " " << a.first << endl;
+                                }
 //                                cout << "+2" << " ";
 //                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
                             }
