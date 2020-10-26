@@ -38,8 +38,8 @@
 using namespace std;
 
 typedef chrono::duration<double> tms;
-typedef int vertex;
-typedef int timestamp;
+typedef long long vertex;
+typedef long timestamp;
 typedef pair<vertex, vertex> edge;
 typedef pair<timestamp, edge> event;
 typedef vector<event> key;  //a prefix or a motif
