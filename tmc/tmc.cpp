@@ -117,6 +117,8 @@ void createGraph (string filename, TGraph& graph, adj_edges& AE){
         sort(it->second.begin(), it->second.end());
         it->second.erase(unique(it->second.begin(), it->second.end()),it->second.end());
     }
+    cout << "nodes:" << AE.size() << endl;
+    cout << "edges:" << graph.size() << endl;
     return;
 }
 
