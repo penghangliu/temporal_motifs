@@ -38,7 +38,7 @@
 using namespace std;
 
 typedef chrono::duration<double> tms;
-typedef long long vertex;
+typedef string vertex;
 typedef long timestamp;
 typedef pair<vertex, vertex> edge;
 typedef pair<timestamp, edge> event;
@@ -88,8 +88,14 @@ inline void print_time (FILE* fp, const string& str, tms t) {
     fflush(fp);
 }
 
+string occurrence(timestamp a, timestamp b, timestamp s);
+string occurrence(timestamp a, timestamp b, timestamp c, timestamp s);
+string easyEncode(edge a, edge b);
 string easyEncode(edge a, edge b, edge c);
+string complexEncode(edge a, edge b, edge s);
+string complexEncode(edge a, edge b, edge c, edge s);
 bool checkConnect(edge a, edge b, edge e);
+bool checkConnect(edge a, edge b, edge e, edge c);
 void createGraph (string filename, TGraph& graph, adj_edges& AE);
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
 void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
@@ -99,5 +105,5 @@ set<vertex> getNodes(vector<event> key);
 void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 char sconvert (int i);
 void removeIsomorphic (map<string, int>& motif_count);
-void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count);
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count);
 #endif /* tmc_hpp */

@@ -20,11 +20,13 @@ int main(int argc, char * argv[]) {
     
     string tmp (argv[1]);
     string gname = tmp.substr (tmp.find_last_of("/") + 1);
-    int d_c=stoi(argv[2]);      //delta C
-    int d_w=stoi(argv[3]);      //delta W
-    int N_vtx=stoi(argv[4]);
-    int N_event=stoi(argv[5]);
-    string out_file = "out_" + gname + "_" + argv[2] + "_" + argv[3] + "_" + argv[4] + "_" + argv[5];
+    string tmp_s (argv[2]);
+    string gname_s = tmp_s.substr (tmp_s.find_last_of("/") + 1);
+    int d_c=stoi(argv[3]);      //delta C
+    int d_w=stoi(argv[4]);      //delta W
+    int N_vtx=stoi(argv[5]);
+    int N_event=stoi(argv[6]);
+    string out_file = "out_" + gname.substr(0,gname.size()-4) + "_" + gname_s.substr(gname_s.find_first_of("_") + 1,gname_s.size()-4) + "_" + argv[3] + "_" + argv[4] + "_" + argv[5] + "_" + argv[6];
 //    if (method=="v1") {
 //        out_file = "out_" + method + "_" + argv[3] + "_" + argv[4] + "_" + argv[5] + "_" + argv[6] + "_" + gname;
 //    } else if (method=="v2"){
@@ -39,12 +41,17 @@ int main(int argc, char * argv[]) {
     TGraph graph;
     adj_edges AE;
     createGraph(tmp, graph, AE);
+    
+    TGraph graph_s;
+    adj_edges BE;
+    createGraph(tmp_s, graph_s, BE);
+    
     const auto t2 = chrono::steady_clock::now();
     print_time (fp, "Read data time: ", t2 - t1);
-    cout << "# of edges: " << graph.size() << endl;
+//    cout << "# of edges: " << graph.size() << endl;
     
     map<string, int> motif_count;
-    Graph2motif(graph, AE, d_c, d_w, N_vtx, N_event, motif_count);
+    Graph2motif(graph, AE, graph_s, BE, d_c, d_w, N_vtx, N_event, motif_count);
     
     const auto t3 = chrono::steady_clock::now();
     print_time (fp, "Count motifs time: ", t3 - t2);

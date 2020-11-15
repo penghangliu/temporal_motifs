@@ -8,7 +8,7 @@
 
 #include "tmc.hpp"
 
-void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count){
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count){
     for (auto it=graph.begin(); it!=graph.end(); ++it) {
         edge e = it->first;
         vector<timestamp> Tm = it->second;
@@ -16,17 +16,81 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
         vertex v = e.second;
         set<edge> edges(AE[u]);
         edges.insert(AE[v].begin(), AE[v].end());
+        set<edge> edges_s(BE[u]);
+        edges_s.insert(BE[v].begin(), BE[v].end());
         
         for (auto ap=edges.begin(); ap!=edges.end(); ++ap) {
+            edge a = *ap;
+            // 3n2e
+            if (!((a.first==u && a.second==v) || (a.first==v && a.second==u))) {
+                vector<timestamp> Ta = graph[a];
+                for (auto cp=edges_s.begin(); cp!=edges_s.end(); ++cp) {
+                    edge c = *cp;
+                    if(!checkConnect(a, c, e)) continue;
+                    vector<timestamp> Tc = graph_s[c];
+                    string s = complexEncode(a, e, c);
+                    for (int j=0; j<Tm.size(); j++) {
+                        for (int i=0; i<Ta.size(); i++) {
+                            if(abs(Ta[i]-Tm[j])>d_c || Ta[i] > Tm[j]) continue;
+                            for (int l=0; l<Tc.size(); l++) {
+                                if (Tc[l]>=(Ta[i]-d_c) && Tc[l]<=(Tm[j]+d_c)) {
+                                    string plus = occurrence(Ta[i], Tm[j], Tc[l]);
+                                    string m = s + plus;
+                                    motif_count[m] += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                string s = easyEncode(a, e);
+                for (int j=0; j<Tm.size(); j++) {
+                    for (int i=0; i<Ta.size(); i++) {
+                        if(abs(Ta[i]-Tm[j])>d_c || Ta[i] > Tm[j]) continue;
+                        motif_count[s] += 1;
+                    }
+                }
+            }
+            // 3n3e
             for (auto bp=ap; bp!=edges.end(); ++bp) {
-                edge a = *ap;
                 edge b = *bp;
                 if(!checkConnect(a, b, e)) continue;
                 vector<timestamp> Ta = graph[a];
                 vector<timestamp> Tb = graph[b];
+                for (auto cp=edges_s.begin(); cp!=edges_s.end(); ++cp) {
+                    edge c = *cp;
+                    if(!checkConnect(a, b, e, c)) continue;
+                    vector<timestamp> Tc = graph_s[c];
+                    string s1 = complexEncode(a, e, b, c);
+                    string s2 = complexEncode(b, e, a, c);
+                    for (int j=0; j<Tm.size(); j++) {
+                        for (int i=0; i<Ta.size(); i++) {
+                            if(abs(Ta[i]-Tm[j])>d_c) continue;
+                            for (int k=0; k<Tb.size(); k++) {
+                                if(abs(Tb[k]-Tm[j])>d_c) continue;
+                                if(abs(Ta[i]-Tb[k])>d_w) continue;
+                                for (int l=0; l<Tc.size(); l++) {
+                                    if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
+                                        if (Tc[l]>=(Ta[i]-d_c) && Tc[l]<=(Tb[k]+d_c)) {
+                                            string plus = occurrence(Ta[i], Tm[j], Tb[k], Tc[l]);
+                                            string m = s1 + plus;
+                                            motif_count[m] += 1;
+                                        }
+                                    }
+                                    if(a.first==b.first && a.second==b.second) continue;
+                                    if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
+                                        if (Tc[l]>=(Tb[k]-d_c) && Tc[l]<=(Ta[i]+d_c)) {
+                                            string plus = occurrence(Tb[k], Tm[j], Ta[i], Tc[l]);
+                                            string m = s2 + plus;
+                                            motif_count[m] += 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 string s1 = easyEncode(a, e, b);
                 string s2 = easyEncode(b, e, a);
-//                cout << a.first << a.second << " " << e.first << e.second << " " << b.first << b.second << " " << s1 << " " << s2 << " ";
                 for (int j=0; j<Tm.size(); j++) {
                     for (int i=0; i<Ta.size(); i++) {
                         if(abs(Ta[i]-Tm[j])>d_c) continue;
@@ -35,29 +99,120 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
                             if(abs(Ta[i]-Tb[k])>d_w) continue;
                             if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
                                 motif_count[s1] += 1;
-                                if (s1=="011220") {
-                                    cout << a.first << " " << e.first << " " << b.first << endl;
-                                }
-//                                cout << "+1" << " ";
-//                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
                             }
                             if(a.first==b.first && a.second==b.second) continue;
                             if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
                                 motif_count[s2] += 1;
-                                if (s2=="011220") {
-                                    cout << b.first << " " << e.first << " " << a.first << endl;
-                                }
-//                                cout << "+2" << " ";
-//                                cout << Ta[i] << Tm[j] << Tb[k] << " ";
                             }
                         }
                     }
                 }
-//                cout << endl;
             }
         }
     }
     return;
+}
+
+string occurrence(timestamp a, timestamp b, timestamp s){
+    if (s <= a) {
+        return "0";
+    } else if (a < s && s <= b){
+        return "1";
+    } else {
+        return "2";
+    }
+}
+
+string occurrence(timestamp a, timestamp b, timestamp c, timestamp s){
+    if (s <= a) {
+        return "0";
+    } else if (a < s && s <= b){
+        return "1";
+    } else if (b < s && s <= c){
+        return "2";
+    } else {
+        return "3";
+    }
+}
+
+string complexEncode(edge a, edge b, edge s){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+//    temp.push_back(c.first);
+//    temp.push_back(c.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    motif.append("_");
+    string u = code[s.first];
+    string v = code[s.second];
+    if (stoi(u)<stoi(v)) {
+        motif.append(u);
+        motif.append(v);
+    } else {
+        motif.append(v);
+        motif.append(u);
+    }
+    motif.append("_");
+    return motif;
+}
+
+string complexEncode(edge a, edge b, edge c, edge s){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+    temp.push_back(c.first);
+    temp.push_back(c.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    motif.append("_");
+    string u = code[s.first];
+    string v = code[s.second];
+    if (stoi(u)<stoi(v)) {
+        motif.append(u);
+        motif.append(v);
+    } else {
+        motif.append(v);
+        motif.append(u);
+    }
+    motif.append("_");
+    return motif;
+}
+
+string easyEncode(edge a, edge b){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    return motif;
 }
 
 string easyEncode(edge a, edge b, edge c){
@@ -80,6 +235,22 @@ string easyEncode(edge a, edge b, edge c){
     return motif;
 }
 
+bool checkConnect(edge a, edge b, edge e, edge c){
+    set<vertex> V;
+    V.insert(a.first);
+    V.insert(a.second);
+    V.insert(b.first);
+    V.insert(b.second);
+    V.insert(e.first);
+    V.insert(e.second);
+    V.insert(c.first);
+    V.insert(c.second);
+    if (V.size()!=3) {
+        return false;
+    }
+    return true;
+}
+
 bool checkConnect(edge a, edge b, edge e){
     set<vertex> V;
     V.insert(a.first);
@@ -88,7 +259,7 @@ bool checkConnect(edge a, edge b, edge e){
     V.insert(b.second);
     V.insert(e.first);
     V.insert(e.second);
-    if (V.size()>3) {
+    if (V.size()!=3) {
         return false;
     }
     return true;
