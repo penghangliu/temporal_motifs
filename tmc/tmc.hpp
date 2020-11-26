@@ -95,7 +95,8 @@ string easyEncode(edge a, edge b, edge c);
 string complexEncode(edge a, edge b, edge s);
 string complexEncode(edge a, edge b, edge c, edge s);
 bool checkConnect(edge a, edge b, edge e);
-bool checkConnect(edge a, edge b, edge e, edge c);
+bool check3n(edge a, edge b, edge e);
+bool check3n(edge a, edge b, edge e, edge c);
 void createGraph (string filename, TGraph& graph, adj_edges& AE);
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
 void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
@@ -105,5 +106,5 @@ set<vertex> getNodes(vector<event> key);
 void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 char sconvert (int i);
 void removeIsomorphic (map<string, int>& motif_count);
-void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count);
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi);
 #endif /* tmc_hpp */
