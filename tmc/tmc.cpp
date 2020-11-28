@@ -8,7 +8,7 @@
 
 #include "tmc.hpp"
 
-void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi){
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method){
     for (auto it=graph.begin(); it!=graph.end(); ++it) {
         edge e = it->first;
         vector<timestamp> Tm = it->second;
@@ -22,18 +22,24 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d
         for (auto ap=edges.begin(); ap!=edges.end(); ++ap) {
             edge a = *ap;
             vector<timestamp> Ta = graph[a];
-            string s = easyEncode(a, e);
+            string S;
+            if (method == "v1") {
+                S = induceEncode(a, e, g);
+            } else {
+                S = easyEncode(a, e);
+            }
             for (int j=0; j<Tm.size(); j++) {
                 for (int i=0; i<Ta.size(); i++) {
                     if(abs(Ta[i]-Tm[j])>d_c || Ta[i] > Tm[j]) continue;
-                    motif_count[s] += 1;
+                    motif_count[S] += 1;
                 }
             }
             // 3n2e
-            if (!((a.first==u && a.second==v) || (a.first==v && a.second==u)) && multi) {
+            if (method == "v2") {
                 for (auto cp=edges_s.begin(); cp!=edges_s.end(); ++cp) {
                     edge c = *cp;
-                    if(!check3n(a, c, e)) continue;
+                    if(checkNodes(a, e)==2 && checkNodes(a, c, e)>2) continue;
+                    if(checkNodes(a, c, e)>3) continue;
                     vector<timestamp> Tc = graph_s[c];
                     string s = complexEncode(a, e, c);
                     for (int j=0; j<Tm.size(); j++) {
@@ -53,12 +59,13 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d
             // 3n3e
             for (auto bp=ap; bp!=edges.end(); ++bp) {
                 edge b = *bp;
-                if(!checkConnect(a, b, e)) continue;
+                if(checkNodes(a, b, e)>3) continue;
                 vector<timestamp> Tb = graph[b];
-                if (multi) {
+                if (method == "v2") {
                     for (auto cp=edges_s.begin(); cp!=edges_s.end(); ++cp) {
                         edge c = *cp;
-                        if(!check3n(a, b, e, c)) continue;
+                        if(checkNodes(a, b, e)==2 && checkNodes(a, b, e, c)>2) continue;
+                        if(checkNodes(a, b, e, c)>3) continue;
                         vector<timestamp> Tc = graph_s[c];
                         string s1 = complexEncode(a, e, b, c);
                         string s2 = complexEncode(b, e, a, c);
@@ -90,8 +97,14 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d
                         }
                     }
                 }
-                string s1 = easyEncode(a, e, b);
-                string s2 = easyEncode(b, e, a);
+                string S1, S2;
+                if (method == "v1") {
+                    S1 = induceEncode(a, e, b, g);
+                    S2 = induceEncode(b, e, a, g);
+                } else {
+                    S1 = easyEncode(a, e, b);
+                    S2 = easyEncode(b, e, a);
+                }
 //                if (s1=="010101" || s2=="010101") {
 //                    cout << "YES" << endl;
 //                }
@@ -102,11 +115,11 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, adj_edges BE, int d
                             if(abs(Tb[k]-Tm[j])>d_c) continue;
                             if(abs(Ta[i]-Tb[k])>d_w) continue;
                             if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
-                                motif_count[s1] += 1;
+                                motif_count[S1] += 1;
                             }
                             if(a.first==b.first && a.second==b.second) continue;
                             if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
-                                motif_count[s2] += 1;
+                                motif_count[S2] += 1;
                             }
                         }
                     }
@@ -137,6 +150,100 @@ string occurrence(timestamp a, timestamp b, timestamp c, timestamp s){
     } else {
         return "3";
     }
+}
+
+set<edge> getLayer2 (set<vertex> nodes, SGraph g){
+    set<edge> output;
+    for (auto it=nodes.begin(); it!=nodes.end(); ++it) {
+        for (auto itt = next(it, 1); itt!=nodes.end(); ++itt) {
+            if (g[*it].find(*itt)!=g[*it].end()) {
+                output.insert(make_pair(*it, *itt));
+            }
+        }
+    }
+    return output;
+}
+
+string induceEncode(edge a, edge b, SGraph g){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+//    temp.push_back(c.first);
+//    temp.push_back(c.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    set<vertex> nodes;
+    for (auto it=code.begin(); it!=code.end(); ++it) {
+        vertex x = it->first;
+        nodes.insert(x);
+    }
+    set<edge> edges = getLayer2(nodes, g);
+    if (edges.size()>0) {
+        motif.append("_");
+    }
+    for (auto ep=edges.begin(); ep!=edges.end(); ++ep) {
+        edge e = *ep;
+        string u = code[e.first];
+        string v = code[e.second];
+        if (stoi(u)<stoi(v)) {
+            motif.append(u);
+            motif.append(v);
+        } else {
+            motif.append(v);
+            motif.append(u);
+        }
+    }
+    return motif;
+}
+
+string induceEncode(edge a, edge b, edge c, SGraph g){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+    temp.push_back(c.first);
+    temp.push_back(c.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    set<vertex> nodes;
+    for (auto it=code.begin(); it!=code.end(); ++it) {
+        vertex x = it->first;
+        nodes.insert(x);
+    }
+    set<edge> edges = getLayer2(nodes, g);
+    if (edges.size()>0) {
+        motif.append("_");
+    }
+    for (auto ep=edges.begin(); ep!=edges.end(); ++ep) {
+        edge e = *ep;
+        string u = code[e.first];
+        string v = code[e.second];
+        if (stoi(u)<stoi(v)) {
+            motif.append(u);
+            motif.append(v);
+        } else {
+            motif.append(v);
+            motif.append(u);
+        }
+    }
+    return motif;
 }
 
 string complexEncode(edge a, edge b, edge s){
@@ -239,21 +346,30 @@ string easyEncode(edge a, edge b, edge c){
     return motif;
 }
 
-bool checkConnect(edge a, edge b, edge e){
+//bool checkConnect(edge a, edge b, edge e){
+//    set<vertex> V;
+//    V.insert(a.first);
+//    V.insert(a.second);
+//    V.insert(b.first);
+//    V.insert(b.second);
+//    V.insert(e.first);
+//    V.insert(e.second);
+//    if (V.size()>3) {
+//        return false;
+//    }
+//    return true;
+//}
+
+int checkNodes(edge a, edge b){
     set<vertex> V;
     V.insert(a.first);
     V.insert(a.second);
     V.insert(b.first);
     V.insert(b.second);
-    V.insert(e.first);
-    V.insert(e.second);
-    if (V.size()>3) {
-        return false;
-    }
-    return true;
+    return V.size();
 }
 
-bool check3n(edge a, edge b, edge e, edge c){
+int checkNodes(edge a, edge b, edge e, edge c){
     set<vertex> V;
     V.insert(a.first);
     V.insert(a.second);
@@ -263,13 +379,10 @@ bool check3n(edge a, edge b, edge e, edge c){
     V.insert(e.second);
     V.insert(c.first);
     V.insert(c.second);
-    if (V.size()!=3) {
-        return false;
-    }
-    return true;
+    return V.size();
 }
 
-bool check3n(edge a, edge b, edge e){
+int checkNodes(edge a, edge b, edge e){
     set<vertex> V;
     V.insert(a.first);
     V.insert(a.second);
@@ -277,10 +390,26 @@ bool check3n(edge a, edge b, edge e){
     V.insert(b.second);
     V.insert(e.first);
     V.insert(e.second);
-    if (V.size()!=3) {
-        return false;
+    return V.size();
+}
+
+void createGraph (string filename, SGraph& graph){
+    ifstream in(filename);
+    string line;
+    
+    while (getline(in, line)) {
+        if (line[0] != '%' && line[0] != '#'){
+            stringstream ss (line);
+            vertex u, v;
+            ss >> u >> v;
+            if (u != v) {
+                graph[u].insert(v);
+                graph[v].insert(u);
+            }
+        }
     }
-    return true;
+    cout << "layer2 nodes:" << graph.size() << endl;
+    return;
 }
 
 void createGraph (string filename, TGraph& graph, adj_edges& AE){
@@ -306,8 +435,8 @@ void createGraph (string filename, TGraph& graph, adj_edges& AE){
         sort(it->second.begin(), it->second.end());
         it->second.erase(unique(it->second.begin(), it->second.end()),it->second.end());
     }
-    cout << "nodes:" << AE.size() << endl;
-    cout << "edges:" << graph.size() << endl;
+    cout << "layer2 nodes:" << AE.size() << endl;
+    cout << "layer2 edges:" << graph.size() << endl;
     return;
 }
 

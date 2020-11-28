@@ -16,17 +16,18 @@ int main(int argc, char * argv[]) {
     string tmp (argv[1]);
     string gname = tmp.substr (tmp.find_last_of("/") + 1);
     string out_file;
-    string tmp_s;
+    string tmp_s, method;
     int d_c, d_w, N_event, N_vtx;
     bool multi;
-    if (argc == 7) {
+    if (argc == 8) {
         tmp_s = argv[2];
         string gname_s = tmp_s.substr (tmp_s.find_last_of("/") + 1);
         d_c=stoi(argv[3]);      //delta C
         d_w=stoi(argv[4]);      //delta W
         N_vtx=stoi(argv[5]);    //doesn't matter
         N_event=stoi(argv[6]);
-        out_file = "out_" + gname.substr(0,gname.size()-4) + "_" + gname_s.substr(gname_s.find_first_of("_") + 1,gname_s.size()-4) + "_" + argv[3] + "_" + argv[4] + "_" + argv[5] + "_" + argv[6];
+        method = argv[7];
+        out_file = "out_" + gname.substr(0,gname.size()-4) + "_" + gname_s.substr(gname_s.find_first_of("_") + 1,gname_s.size()-4) + "_" + argv[3] + "_" + argv[4] + "_" + argv[5] + "_" + argv[6] + "_" + method;
         multi = true;
     } else {
         d_c=stoi(argv[2]);      //delta C
@@ -49,8 +50,12 @@ int main(int argc, char * argv[]) {
     createGraph(tmp, graph, AE);
     
     TGraph graph_s;
+    SGraph g;
     adj_edges BE;
-    if (argc == 7) {
+    if (method == "v1") {
+        createGraph(tmp_s, g);
+    }
+    if (method == "v2") {
         createGraph(tmp_s, graph_s, BE);
     }
         
@@ -58,7 +63,7 @@ int main(int argc, char * argv[]) {
     print_time (fp, "Read data time: ", t2 - t1);
     
     map<string, int> motif_count;
-    Graph2motif(graph, AE, graph_s, BE, d_c, d_w, N_vtx, N_event, motif_count, multi);
+    Graph2motif(graph, AE, graph_s, g, BE, d_c, d_w, N_vtx, N_event, motif_count, multi, method);
     
     const auto t3 = chrono::steady_clock::now();
     print_time (fp, "Count motifs time: ", t3 - t2);
