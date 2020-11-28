@@ -28,10 +28,17 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
             } else {
                 S = easyEncode(a, e);
             }
-            for (int j=0; j<Tm.size(); j++) {
-                for (int i=0; i<Ta.size(); i++) {
-                    if(abs(Ta[i]-Tm[j])>d_c || Ta[i] > Tm[j]) continue;
-                    motif_count[S] += 1;
+            if (e.first==a.first && e.second==a.second) {
+                int count = Tm.size();
+                if (count > 2) {
+                    motif_count[S] += (count * (count-1)) / 2;
+                }
+            } else {
+                for (int j=0; j<Tm.size(); j++) {
+                    for (int i=0; i<Ta.size(); i++) {
+                        if(abs(Ta[i]-Tm[j])>d_c || Ta[i] > Tm[j]) continue;
+                        motif_count[S] += 1;
+                    }
                 }
             }
             // 3n2e
@@ -171,6 +178,9 @@ string induceEncode(edge a, edge b, SGraph g){
     code[a.second] = "1";
     motif.append("01");
     vector<vertex> temp;
+    vector<vertex> nodes;
+    nodes.push_back(a.first);
+    nodes.push_back(a.second);
     temp.push_back(b.first);
     temp.push_back(b.second);
 //    temp.push_back(c.first);
@@ -178,29 +188,24 @@ string induceEncode(edge a, edge b, SGraph g){
     for (int i=0; i<temp.size(); i++) {
         if (code.find(temp[i])==code.end()){
             code[temp[i]] = "2";
+            nodes.push_back(temp[i]);
         }
         motif.append(code[temp[i]]);
     }
-    set<vertex> nodes;
-    for (auto it=code.begin(); it!=code.end(); ++it) {
-        vertex x = it->first;
-        nodes.insert(x);
-    }
-    set<edge> edges = getLayer2(nodes, g);
-    if (edges.size()>0) {
-        motif.append("_");
-    }
-    for (auto ep=edges.begin(); ep!=edges.end(); ++ep) {
-        edge e = *ep;
-        string u = code[e.first];
-        string v = code[e.second];
-        if (stoi(u)<stoi(v)) {
-            motif.append(u);
-            motif.append(v);
-        } else {
-            motif.append(v);
-            motif.append(u);
+    string l2;
+    for (auto it=nodes.begin(); it!=nodes.end(); ++it) {
+        for (auto itt=next(it,1); itt!=nodes.end(); ++itt) {
+            vertex x = *it;
+            vertex y = *itt;
+            if (g[x].find(y)!=g[x].end()) {
+                l2.append(code[x]);
+                l2.append(code[y]);
+            }
         }
+    }
+    if (l2.size()>0) {
+        motif.append("_");
+        motif.append(l2);
     }
     return motif;
 }
@@ -212,6 +217,9 @@ string induceEncode(edge a, edge b, edge c, SGraph g){
     code[a.second] = "1";
     motif.append("01");
     vector<vertex> temp;
+    vector<vertex> nodes;
+    nodes.push_back(a.first);
+    nodes.push_back(a.second);
     temp.push_back(b.first);
     temp.push_back(b.second);
     temp.push_back(c.first);
@@ -219,29 +227,24 @@ string induceEncode(edge a, edge b, edge c, SGraph g){
     for (int i=0; i<temp.size(); i++) {
         if (code.find(temp[i])==code.end()){
             code[temp[i]] = "2";
+            nodes.push_back(temp[i]);
         }
         motif.append(code[temp[i]]);
     }
-    set<vertex> nodes;
-    for (auto it=code.begin(); it!=code.end(); ++it) {
-        vertex x = it->first;
-        nodes.insert(x);
-    }
-    set<edge> edges = getLayer2(nodes, g);
-    if (edges.size()>0) {
-        motif.append("_");
-    }
-    for (auto ep=edges.begin(); ep!=edges.end(); ++ep) {
-        edge e = *ep;
-        string u = code[e.first];
-        string v = code[e.second];
-        if (stoi(u)<stoi(v)) {
-            motif.append(u);
-            motif.append(v);
-        } else {
-            motif.append(v);
-            motif.append(u);
+    string l2;
+    for (auto it=nodes.begin(); it!=nodes.end(); ++it) {
+        for (auto itt=next(it,1); itt!=nodes.end(); ++itt) {
+            vertex x = *it;
+            vertex y = *itt;
+            if (g[x].find(y)!=g[x].end()) {
+                l2.append(code[x]);
+                l2.append(code[y]);
+            }
         }
+    }
+    if (l2.size()>0) {
+        motif.append("_");
+        motif.append(l2);
     }
     return motif;
 }
