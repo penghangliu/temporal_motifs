@@ -94,8 +94,12 @@ string induceEncode(edge a, edge b, SGraph g);
 string induceEncode(edge a, edge b, edge c, SGraph g);
 string occurrence(timestamp a, timestamp b, timestamp s);
 string occurrence(timestamp a, timestamp b, timestamp c, timestamp s);
+string occurrence(timestamp a, timestamp b, vector<timestamp> T1, vector<timestamp> T2, vector<timestamp> T3, int d_c);
+string occurrence(timestamp a, timestamp b, timestamp c, vector<timestamp> T1, vector<timestamp> T2, vector<timestamp> T3, int d_c);
 string easyEncode(edge a, edge b);
 string easyEncode(edge a, edge b, edge c);
+string easyEncode(edge a, edge b, vector<vertex>& vlist);
+string easyEncode(edge a, edge b, edge c, vector<vertex>& vlist);
 string complexEncode(edge a, edge b, edge s);
 string complexEncode(edge a, edge b, edge c, edge s);
 //bool checkConnect(edge a, edge b, edge e);
@@ -104,6 +108,7 @@ int checkNodes(edge a, edge b, edge e);
 int checkNodes(edge a, edge b, edge e, edge c);
 void createGraph (string filename, SGraph& graph);
 void createGraph (string filename, TGraph& graph, adj_edges& AE);
+void createUndirectedGraph (string filename, TGraph& graph);
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
 void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w);    //Increment the instance count and update the prefix type
 string encodeMotif(vector<event> instance); //identify the type of motif

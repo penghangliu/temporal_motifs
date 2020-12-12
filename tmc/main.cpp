@@ -56,7 +56,8 @@ int main(int argc, char * argv[]) {
         createGraph(tmp_s, g);
     }
     if (method == "v2") {
-        createGraph(tmp_s, graph_s, BE);
+        createUndirectedGraph(tmp_s, graph_s);
+//        createGraph(tmp_s, graph_s, BE);
     }
         
     const auto t2 = chrono::steady_clock::now();
@@ -70,7 +71,7 @@ int main(int argc, char * argv[]) {
     print_time (fp, "End-to-end Time: ", t3 - t1);
     
     for (auto it=motif_count.begin(); it!=motif_count.end(); ++it) {
-        fprintf(fp, "%s \t %d \n", (*it).first.c_str(), (*it).second);
+        fprintf(fp, "%s,%d \n", (*it).first.c_str(), (*it).second);
     }
 //    for (auto it=graph.begin(); it!=graph.end(); ++it) {
 //        cout << it->first.first << " " << it->first.second << " : ";
