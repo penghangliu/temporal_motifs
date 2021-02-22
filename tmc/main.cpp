@@ -46,8 +46,9 @@ int main(int argc, char * argv[]) {
     
 //Read file and create a sorted list of temporal events
     TGraph graph;
+    IPC ipc;
     adj_edges AE;
-    createGraph(tmp, graph, AE);
+    createGraph(tmp, graph, AE, ipc);
     
     TGraph graph_s;
     SGraph g;
@@ -64,7 +65,7 @@ int main(int argc, char * argv[]) {
     print_time (fp, "Read data time: ", t2 - t1);
     
     map<string, int> motif_count;
-    Graph2motif(graph, AE, graph_s, g, BE, d_c, d_w, N_vtx, N_event, motif_count, multi, method);
+    Graph2motif(graph, AE, graph_s, g, BE, d_c, d_w, N_vtx, N_event, motif_count, multi, method, ipc);
     
     const auto t3 = chrono::steady_clock::now();
     print_time (fp, "Count motifs time: ", t3 - t2);

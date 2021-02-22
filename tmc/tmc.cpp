@@ -8,7 +8,7 @@
 
 #include "tmc.hpp"
 
-void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method){
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method, IPC ipc){
     int iter = 0;
     for (auto it=graph.begin(); it!=graph.end(); ++it) {
         if (iter % 100 == 0) {
@@ -39,7 +39,10 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                 for (int j=0; j<Tm.size(); j++) {
                     for (int i=0; i<Ta.size(); i++) {
                         if(abs(Ta[i]-Tm[j])>d_c || Ta[i] >= Tm[j]) continue;
-                        motif_count[S] += 1;
+                        event e_t = make_pair(Tm[j], e);
+                        event a_t = make_pair(Ta[i], a);
+                        string m = S + "," + ipc[a_t] + "," + ipc[e_t];
+                        motif_count[m] += 1;
                     }
                 }
             } else {
@@ -126,11 +129,19 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                                 if(abs(Tb[k]-Tm[j])>d_c) continue;
                                 if(abs(Ta[i]-Tb[k])>d_w) continue;
                                 if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
-                                    motif_count[S1] += 1;
+                                    event e_t = make_pair(Tm[j], e);
+                                    event a_t = make_pair(Ta[i], a);
+                                    event b_t = make_pair(Tb[k], b);
+                                    string m = S1 + "," + ipc[a_t] + "," + ipc[e_t] + "," + ipc[b_t];
+                                    motif_count[m] += 1;
                                 }
                                 if(a.first==b.first && a.second==b.second) continue;
                                 if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
-                                    motif_count[S2] += 1;
+                                    event e_t = make_pair(Tm[j], e);
+                                    event a_t = make_pair(Ta[i], a);
+                                    event b_t = make_pair(Tb[k], b);
+                                    string m = S2 + "," + ipc[b_t] + "," + ipc[e_t] + "," + ipc[a_t];
+                                    motif_count[m] += 1;
                                 }
                             }
                         }
@@ -519,6 +530,38 @@ int checkNodes(edge a, edge b, edge e){
     V.insert(e.first);
     V.insert(e.second);
     return V.size();
+}
+
+void createGraph (string filename, TGraph& graph, adj_edges& AE, IPC& ipc){
+    ifstream in(filename);
+    string line;
+    
+    while (getline(in, line)) {
+        if (line[0] != '%' && line[0] != '#'){
+            stringstream ss (line);
+            vertex u, v;
+            timestamp t;
+            string c;
+            edge e;
+            event e_t;
+            ss >> u >> v >> t >> c;
+            if (u != v) {
+                e = make_pair(u, v);
+                graph[e].push_back(t);
+                AE[u].insert(e);
+                AE[v].insert(e);
+                e_t = make_pair(t, e);
+                ipc[e_t] = c;
+            }
+        }
+    }
+    for (auto it=graph.begin(); it!=graph.end(); ++it) {
+        sort(it->second.begin(), it->second.end());
+        it->second.erase(unique(it->second.begin(), it->second.end()),it->second.end());
+    }
+    cout << "layer2 nodes:" << AE.size() << endl;
+    cout << "layer2 edges:" << graph.size() << endl;
+    return;
 }
 
 void createGraph (string filename, SGraph& graph){
