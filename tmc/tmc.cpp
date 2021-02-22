@@ -41,7 +41,7 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                         if(abs(Ta[i]-Tm[j])>d_c || Ta[i] >= Tm[j]) continue;
                         event e_t = make_pair(Tm[j], e);
                         event a_t = make_pair(Ta[i], a);
-                        string m = S + "," + ipc[a_t] + "," + ipc[e_t];
+                        string m = S + "," + ipc[a_t] + ipc[e_t];
                         motif_count[m] += 1;
                     }
                 }
@@ -132,7 +132,7 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                                     event e_t = make_pair(Tm[j], e);
                                     event a_t = make_pair(Ta[i], a);
                                     event b_t = make_pair(Tb[k], b);
-                                    string m = S1 + "," + ipc[a_t] + "," + ipc[e_t] + "," + ipc[b_t];
+                                    string m = S1 + "," + ipc[a_t] + ipc[e_t] + ipc[b_t];
                                     motif_count[m] += 1;
                                 }
                                 if(a.first==b.first && a.second==b.second) continue;
@@ -140,7 +140,7 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                                     event e_t = make_pair(Tm[j], e);
                                     event a_t = make_pair(Ta[i], a);
                                     event b_t = make_pair(Tb[k], b);
-                                    string m = S2 + "," + ipc[b_t] + "," + ipc[e_t] + "," + ipc[a_t];
+                                    string m = S2 + "," + ipc[b_t] + ipc[e_t] + ipc[a_t];
                                     motif_count[m] += 1;
                                 }
                             }
