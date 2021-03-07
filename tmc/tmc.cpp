@@ -8,7 +8,7 @@
 
 #include "tmc.hpp"
 
-void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method, IPC ipc){
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method, IPC ipc, FILE* oofp){
     int iter = 0;
     for (auto it=graph.begin(); it!=graph.end(); ++it) {
         if (iter % 100 == 0) {
@@ -43,6 +43,20 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                         event a_t = make_pair(Ta[i], a);
                         string m = S + "," + ipc[a_t] + ipc[e_t];
                         motif_count[m] += 1;
+                        set<vertex> oo;
+                        oo.insert(a.first);
+                        oo.insert(a.second);
+                        oo.insert(e.first);
+                        oo.insert(a.second);
+                        fprintf(oofp, "%s", m.c_str());
+                        for (auto it=oo.begin(); it!=oo.end(); ++it) {
+                            vertex oot = *it;
+                            fprintf(oofp, ",%s", oot.c_str());
+                        }
+                        if (oo.size()<3) {
+                            fprintf(oofp, ",");
+                        }
+                        fprintf(oofp, "\n");
                     }
                 }
             } else {
@@ -134,6 +148,22 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                                     event b_t = make_pair(Tb[k], b);
                                     string m = S1 + "," + ipc[a_t] + ipc[e_t] + ipc[b_t];
                                     motif_count[m] += 1;
+                                    set<vertex> oo;
+                                    oo.insert(a.first);
+                                    oo.insert(a.second);
+                                    oo.insert(e.first);
+                                    oo.insert(a.second);
+                                    oo.insert(b.first);
+                                    oo.insert(b.second);
+                                    fprintf(oofp, "%s", m.c_str());
+                                    for (auto it=oo.begin(); it!=oo.end(); ++it) {
+                                        vertex oot = *it;
+                                        fprintf(oofp, ",%s", oot.c_str());
+                                    }
+                                    if (oo.size()<3) {
+                                        fprintf(oofp, ",");
+                                    }
+                                    fprintf(oofp, "\n");
                                 }
                                 if(a.first==b.first && a.second==b.second) continue;
                                 if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
@@ -142,6 +172,22 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                                     event b_t = make_pair(Tb[k], b);
                                     string m = S2 + "," + ipc[b_t] + ipc[e_t] + ipc[a_t];
                                     motif_count[m] += 1;
+                                    set<vertex> oo;
+                                    oo.insert(a.first);
+                                    oo.insert(a.second);
+                                    oo.insert(e.first);
+                                    oo.insert(a.second);
+                                    oo.insert(b.first);
+                                    oo.insert(b.second);
+                                    fprintf(oofp, "%s", m.c_str());
+                                    for (auto it=oo.begin(); it!=oo.end(); ++it) {
+                                        vertex oot = *it;
+                                        fprintf(oofp, ",%s", oot.c_str());
+                                    }
+                                    if (oo.size()<3) {
+                                        fprintf(oofp, ",");
+                                    }
+                                    fprintf(oofp, "\n");
                                 }
                             }
                         }

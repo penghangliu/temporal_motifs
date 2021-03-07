@@ -40,6 +40,8 @@ int main(int argc, char * argv[]) {
     
 
     FILE* fp = fopen (out_file.c_str(), "w");
+    string oofile = out_file + "_nodes";
+    FILE* oofp = fopen (oofile.c_str(), "w");
     
     cout << "delta W: " << d_w << endl;
     cout << "delta C: " << d_c << endl;
@@ -65,7 +67,7 @@ int main(int argc, char * argv[]) {
     print_time (fp, "Read data time: ", t2 - t1);
     
     map<string, int> motif_count;
-    Graph2motif(graph, AE, graph_s, g, BE, d_c, d_w, N_vtx, N_event, motif_count, multi, method, ipc);
+    Graph2motif(graph, AE, graph_s, g, BE, d_c, d_w, N_vtx, N_event, motif_count, multi, method, ipc, oofp);
     
     const auto t3 = chrono::steady_clock::now();
     print_time (fp, "Count motifs time: ", t3 - t2);

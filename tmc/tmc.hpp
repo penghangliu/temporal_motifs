@@ -119,5 +119,5 @@ set<vertex> getNodes(vector<event> key);
 void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 char sconvert (int i);
 void removeIsomorphic (map<string, int>& motif_count);
-void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method, IPC ipc);
+void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges BE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count, bool multi, string method, IPC ipc, FILE* oofp);
 #endif /* tmc_hpp */
