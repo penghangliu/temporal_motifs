@@ -9,7 +9,12 @@
 #include "tmc.hpp"
 
 void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count){
+    int iter = 0;
     for (auto it=graph.begin(); it!=graph.end(); ++it) { // second edge
+        if (iter % 100 == 0) {
+            cout << iter << " of " << graph.size() << endl;
+        }
+        iter++;
         edge e = it->first;
         vector<timestamp> Tm = it->second;
         vertex u = e.first;
