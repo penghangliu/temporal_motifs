@@ -14,26 +14,47 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
         vector<timestamp> Tm = it->second;
         vertex u = e.first;
         vertex v = e.second;
-        set<edge> edges(AE[u]);
-        edges.insert(AE[v].begin(), AE[v].end());
+        set<edge> u_connect (AE[u]);
+        set<edge> v_connect (AE[v]);
+//        edges.insert(AE[v].begin(), AE[v].end());
 
-        for (auto ap=edges.begin(); ap!=edges.end(); ++ap) { // first edge
+        for (auto ap=u_connect.begin(); ap!=u_connect.end(); ++ap) { // first edge
             edge a = *ap;
-            if ((a.first==e.first && a.second==e.second)||(a.first==e.second && a.second==e.first)) {
-                for (auto bp=edges.begin(); bp!=edges.end(); ++bp) { // third edge
-                    edge b = *bp;
-                    Tcount(a, e, b, graph, d_c, d_w, motif_count);
-                }
+            if ((a.first==u && a.second==v)||(a.first==v && a.second==u)) continue;
+            vertex w;
+            if (a.first!=u && a.first!=v) {
+                w = a.first;
+            } else {
+                w = a.second;
             }
-            else {
-                set<vertex> nodes = get_Nodes(a, e);
-                set<edge> third = get_third(AE, nodes);
-                for (auto bp=third.begin(); bp!=third.end(); ++bp) { // third edge
-                    edge b = *bp;
-                    if(graph.find(b)==graph.end()) continue;
-                    Tcount(a, e, b, graph, d_c, d_w, motif_count);
-                }
+            edge b1 = make_pair(v, w);
+            edge b2 = make_pair(w, v);
+            set<edge> four = get_combination(u, v, w, graph);
+            for (auto cp=four.begin(); cp!=four.end(); ++cp) {
+                edge c = *cp;
+                Tcount(a, e, b1, c, graph, d_c, d_w, motif_count);
+                Tcount(a, e, b2, c, graph, d_c, d_w, motif_count);
             }
+        }
+        
+        for (auto ap=v_connect.begin(); ap!=v_connect.end(); ++ap) { // first edge
+            edge a = *ap;
+            if ((a.first==u && a.second==v)||(a.first==v && a.second==u)) continue;
+            vertex w;
+            if (a.first!=u && a.first!=v) {
+                w = a.first;
+            } else {
+                w = a.second;
+            }
+            edge b1 = make_pair(u, w);
+            edge b2 = make_pair(w, u);
+            set<edge> four = get_combination(u, v, w, graph);
+            for (auto cp=four.begin(); cp!=four.end(); ++cp) {
+                edge c = *cp;
+                Tcount(a, e, b1, c, graph, d_c, d_w, motif_count);
+                Tcount(a, e, b2, c, graph, d_c, d_w, motif_count);
+            }
+        }
 //            set<vertex> nodes = get_Nodes(a, e);
 //            set<edge> third = nodes.size()==2 ? edges : get_third(AE, nodes);
 ////            cout << a.first << a.second << " " << e.first << e.second << " " << third.size() << " ";
@@ -86,9 +107,32 @@ void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_
 ////                cout << endl;
 //            }
 //            cout << endl;
-        }
+//        }
     }
     return;
+}
+
+void Tcount(edge a, edge b, edge c, edge d, TGraph graph, int d_c, int d_w, map<string, int>&  motif_count){
+    vector<timestamp> Ta = graph[a];
+    vector<timestamp> Tb = graph[b];
+    vector<timestamp> Tc = graph[c];
+    vector<timestamp> Td = graph[d];
+    string s = easyEncode(a, b, c, d);
+    for (int j=0; j<Tb.size(); j++) {
+        for (int i=0; i<Ta.size(); i++) {
+            if(abs(Ta[i]-Tb[j])>d_c) continue;
+            for (int k=0; k<Tc.size(); k++) {
+                if(abs(Tc[k]-Tb[j])>d_c) continue;
+                for (int l=0; l<Td.size(); l++) {
+                    if(abs(Td[l]-Tc[k])>d_c) continue;
+                    if(abs(Td[l]-Ta[i])>d_w) continue;
+                    if(Ta[i] < Tb[j] && Tb[j] < Tc[k] && Tc[k] < Td[l]){
+                        motif_count[s] += 1;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Tcount(edge a, edge b, edge c, TGraph graph, int d_c, int d_w, map<string, int>&  motif_count){
@@ -108,6 +152,17 @@ void Tcount(edge a, edge b, edge c, TGraph graph, int d_c, int d_w, map<string, 
             }
         }
     }
+}
+
+set<edge> get_combination(vertex u, vertex v, vertex w, TGraph graph){
+    set<edge> output;
+    if(graph.find(make_pair(u, v))!=graph.end()) output.insert(make_pair(u, v));
+    if(graph.find(make_pair(v, u))!=graph.end()) output.insert(make_pair(v, u));
+    if(graph.find(make_pair(u, w))!=graph.end()) output.insert(make_pair(u, w));
+    if(graph.find(make_pair(w, u))!=graph.end()) output.insert(make_pair(w, u));
+    if(graph.find(make_pair(v, w))!=graph.end()) output.insert(make_pair(v, w));
+    if(graph.find(make_pair(w, v))!=graph.end()) output.insert(make_pair(w, v));
+    return output;
 }
 
 set<edge> get_third(adj_edges AE, set<vertex> nodes){
@@ -186,6 +241,28 @@ string easyEncode(edge a, edge b, edge c){
     temp.push_back(b.second);
     temp.push_back(c.first);
     temp.push_back(c.second);
+    for (int i=0; i<temp.size(); i++) {
+        if (code.find(temp[i])==code.end()){
+            code[temp[i]] = "2";
+        }
+        motif.append(code[temp[i]]);
+    }
+    return motif;
+}
+
+string easyEncode(edge a, edge b, edge c, edge d){
+    string motif;
+    map<vertex, string> code;
+    code[a.first] = "0";
+    code[a.second] = "1";
+    motif.append("01");
+    vector<vertex> temp;
+    temp.push_back(b.first);
+    temp.push_back(b.second);
+    temp.push_back(c.first);
+    temp.push_back(c.second);
+    temp.push_back(d.first);
+    temp.push_back(d.second);
     for (int i=0; i<temp.size(); i++) {
         if (code.find(temp[i])==code.end()){
             code[temp[i]] = "2";

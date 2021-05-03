@@ -89,10 +89,12 @@ inline void print_time (FILE* fp, const string& str, tms t) {
 }
 
 set<edge> get_third(adj_edges AE, set<vertex> nodes);
+set<edge> get_combination(vertex u, vertex v, vertex w, TGraph graph);
 set<vertex> get_Nodes(edge a, edge b);
 int n_larger_eq(vector<timestamp> T, timestamp t);
 int n_less_eq(vector<timestamp> T, timestamp t);
 string easyEncode(edge a, edge b, edge c);
+string easyEncode(edge a, edge b, edge c, edge d);
 bool checkConnect(edge a, edge b, edge e);
 void createGraph (string filename, TGraph& graph, adj_edges& AE);
 void createEvents (string filename, vector<event>& events); //Load and sort the event list
@@ -105,4 +107,5 @@ char sconvert (int i);
 void removeIsomorphic (map<string, int>& motif_count);
 void Graph2motif(TGraph graph, adj_edges AE, int d_c, int d_w, int N_vtx, int N_event, map<string, int>&  motif_count);
 void Tcount(edge a, edge b, edge c, TGraph graph, int d_c, int d_w, map<string, int>&  motif_count);
+void Tcount(edge a, edge b, edge c, edge d, TGraph graph, int d_c, int d_w, map<string, int>&  motif_count);
 #endif /* tmc_hpp */
