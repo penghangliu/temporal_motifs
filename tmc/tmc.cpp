@@ -81,119 +81,122 @@ void Graph2motif(TGraph graph, adj_edges AE, TGraph graph_s, SGraph g, adj_edges
                 }
             }
             // 3n3e
-            for (auto bp=ap; bp!=edges.end(); ++bp) {
-                edge b = *bp;
-                if(checkNodes(a, b, e)>3) continue;
-                vector<timestamp> Tb = graph[b];
-                if (method == "v2") {
-                    vector<vertex> vlist, vlist_r;
-                    string s1 = easyEncode(a, e, b, vlist);
-                    string s2 = easyEncode(b, e, a, vlist_r);
-                    edge one, two, three, one_r, two_r, three_r;
-                    one = make_pair(vlist[0], vlist[1]);
-                    one_r = make_pair(vlist_r[0], vlist_r[1]);
-                    if (vlist.size()==3) {
-                        two = make_pair(vlist[0], vlist[2]);
-                        two_r = make_pair(vlist_r[0], vlist_r[2]);
-                        three = make_pair(vlist[1], vlist[2]);
-                        three_r = make_pair(vlist_r[1], vlist_r[2]);
-                    }
-                    vector<timestamp> T1 = graph_s[one];
-                    vector<timestamp> T2 = graph_s[two];
-                    vector<timestamp> T3 = graph_s[three];
-                    vector<timestamp> T1_r = graph_s[one_r];
-                    vector<timestamp> T2_r = graph_s[two_r];
-                    vector<timestamp> T3_r = graph_s[three_r];
-                    for (int j=0; j<Tm.size(); j++) {
-                        for (int i=0; i<Ta.size(); i++) {
-                            if(abs(Ta[i]-Tm[j])>d_c) continue;
-                            for (int k=0; k<Tb.size(); k++) {
-                                if(abs(Tb[k]-Tm[j])>d_c) continue;
-                                if(abs(Ta[i]-Tb[k])>d_w) continue;
-                                if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
-                                    string plus = occurrence(Ta[i], Tm[j], Tb[k], T1, T2, T3, d_c);
-                                    string m = s1 + plus;
-                                    motif_count[m] += 1;
-                                }
-                                if(a.first==b.first && a.second==b.second) continue;
-                                if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
-                                    string plus = occurrence(Tb[k], Tm[j], Ta[i], T1_r, T2_r, T3_r, d_c);
-                                    string m = s2 + plus;
-                                    motif_count[m] += 1;
+            if (N_event==3) {
+                for (auto bp=ap; bp!=edges.end(); ++bp) {
+                    edge b = *bp;
+                    if(checkNodes(a, b, e)>3) continue;
+                    vector<timestamp> Tb = graph[b];
+                    if (method == "v2") {
+                        vector<vertex> vlist, vlist_r;
+                        string s1 = easyEncode(a, e, b, vlist);
+                        string s2 = easyEncode(b, e, a, vlist_r);
+                        edge one, two, three, one_r, two_r, three_r;
+                        one = make_pair(vlist[0], vlist[1]);
+                        one_r = make_pair(vlist_r[0], vlist_r[1]);
+                        if (vlist.size()==3) {
+                            two = make_pair(vlist[0], vlist[2]);
+                            two_r = make_pair(vlist_r[0], vlist_r[2]);
+                            three = make_pair(vlist[1], vlist[2]);
+                            three_r = make_pair(vlist_r[1], vlist_r[2]);
+                        }
+                        vector<timestamp> T1 = graph_s[one];
+                        vector<timestamp> T2 = graph_s[two];
+                        vector<timestamp> T3 = graph_s[three];
+                        vector<timestamp> T1_r = graph_s[one_r];
+                        vector<timestamp> T2_r = graph_s[two_r];
+                        vector<timestamp> T3_r = graph_s[three_r];
+                        for (int j=0; j<Tm.size(); j++) {
+                            for (int i=0; i<Ta.size(); i++) {
+                                if(abs(Ta[i]-Tm[j])>d_c) continue;
+                                for (int k=0; k<Tb.size(); k++) {
+                                    if(abs(Tb[k]-Tm[j])>d_c) continue;
+                                    if(abs(Ta[i]-Tb[k])>d_w) continue;
+                                    if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
+                                        string plus = occurrence(Ta[i], Tm[j], Tb[k], T1, T2, T3, d_c);
+                                        string m = s1 + plus;
+                                        motif_count[m] += 1;
+                                    }
+                                    if(a.first==b.first && a.second==b.second) continue;
+                                    if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
+                                        string plus = occurrence(Tb[k], Tm[j], Ta[i], T1_r, T2_r, T3_r, d_c);
+                                        string m = s2 + plus;
+                                        motif_count[m] += 1;
+                                    }
                                 }
                             }
                         }
-                    }
-                } else {
-                    string S1, S2;
-                    if (method == "v1") {
-                        S1 = induceEncode(a, e, b, g);
-                        S2 = induceEncode(b, e, a, g);
                     } else {
-                        S1 = easyEncode(a, e, b);
-                        S2 = easyEncode(b, e, a);
-                    }
-    //                if (s1=="010101" || s2=="010101") {
-    //                    cout << "YES" << endl;
-    //                }
-                    for (int j=0; j<Tm.size(); j++) {
-                        for (int i=0; i<Ta.size(); i++) {
-                            if(abs(Ta[i]-Tm[j])>d_c) continue;
-                            for (int k=0; k<Tb.size(); k++) {
-                                if(abs(Tb[k]-Tm[j])>d_c) continue;
-                                if(abs(Ta[i]-Tb[k])>d_w) continue;
-                                if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
-                                    event e_t = make_pair(Tm[j], e);
-                                    event a_t = make_pair(Ta[i], a);
-                                    event b_t = make_pair(Tb[k], b);
-                                    string m = S1 + "," + ipc[a_t] + ipc[e_t] + ipc[b_t];
-                                    motif_count[m] += 1;
-                                    set<vertex> oo;
-                                    oo.insert(a.first);
-                                    oo.insert(a.second);
-                                    oo.insert(e.first);
-                                    oo.insert(a.second);
-                                    oo.insert(b.first);
-                                    oo.insert(b.second);
-                                    fprintf(oofp, "%s", m.c_str());
-                                    for (auto it=oo.begin(); it!=oo.end(); ++it) {
-                                        vertex oot = *it;
-                                        fprintf(oofp, ",%s", oot.c_str());
+                        string S1, S2;
+                        if (method == "v1") {
+                            S1 = induceEncode(a, e, b, g);
+                            S2 = induceEncode(b, e, a, g);
+                        } else {
+                            S1 = easyEncode(a, e, b);
+                            S2 = easyEncode(b, e, a);
+                        }
+        //                if (s1=="010101" || s2=="010101") {
+        //                    cout << "YES" << endl;
+        //                }
+                        for (int j=0; j<Tm.size(); j++) {
+                            for (int i=0; i<Ta.size(); i++) {
+                                if(abs(Ta[i]-Tm[j])>d_c) continue;
+                                for (int k=0; k<Tb.size(); k++) {
+                                    if(abs(Tb[k]-Tm[j])>d_c) continue;
+                                    if(abs(Ta[i]-Tb[k])>d_w) continue;
+                                    if(Ta[i] < Tm[j] && Tm[j] < Tb[k]){
+                                        event e_t = make_pair(Tm[j], e);
+                                        event a_t = make_pair(Ta[i], a);
+                                        event b_t = make_pair(Tb[k], b);
+                                        string m = S1 + "," + ipc[a_t] + ipc[e_t] + ipc[b_t];
+                                        motif_count[m] += 1;
+                                        set<vertex> oo;
+                                        oo.insert(a.first);
+                                        oo.insert(a.second);
+                                        oo.insert(e.first);
+                                        oo.insert(a.second);
+                                        oo.insert(b.first);
+                                        oo.insert(b.second);
+                                        fprintf(oofp, "%s", m.c_str());
+                                        for (auto it=oo.begin(); it!=oo.end(); ++it) {
+                                            vertex oot = *it;
+                                            fprintf(oofp, ",%s", oot.c_str());
+                                        }
+                                        if (oo.size()<3) {
+                                            fprintf(oofp, ",");
+                                        }
+                                        fprintf(oofp, "\n");
                                     }
-                                    if (oo.size()<3) {
-                                        fprintf(oofp, ",");
+                                    if(a.first==b.first && a.second==b.second) continue;
+                                    if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
+                                        event e_t = make_pair(Tm[j], e);
+                                        event a_t = make_pair(Ta[i], a);
+                                        event b_t = make_pair(Tb[k], b);
+                                        string m = S2 + "," + ipc[b_t] + ipc[e_t] + ipc[a_t];
+                                        motif_count[m] += 1;
+                                        set<vertex> oo;
+                                        oo.insert(a.first);
+                                        oo.insert(a.second);
+                                        oo.insert(e.first);
+                                        oo.insert(a.second);
+                                        oo.insert(b.first);
+                                        oo.insert(b.second);
+                                        fprintf(oofp, "%s", m.c_str());
+                                        for (auto it=oo.begin(); it!=oo.end(); ++it) {
+                                            vertex oot = *it;
+                                            fprintf(oofp, ",%s", oot.c_str());
+                                        }
+                                        if (oo.size()<3) {
+                                            fprintf(oofp, ",");
+                                        }
+                                        fprintf(oofp, "\n");
                                     }
-                                    fprintf(oofp, "\n");
-                                }
-                                if(a.first==b.first && a.second==b.second) continue;
-                                if (Ta[i] > Tm[j] && Tm[j] > Tb[k]) {
-                                    event e_t = make_pair(Tm[j], e);
-                                    event a_t = make_pair(Ta[i], a);
-                                    event b_t = make_pair(Tb[k], b);
-                                    string m = S2 + "," + ipc[b_t] + ipc[e_t] + ipc[a_t];
-                                    motif_count[m] += 1;
-                                    set<vertex> oo;
-                                    oo.insert(a.first);
-                                    oo.insert(a.second);
-                                    oo.insert(e.first);
-                                    oo.insert(a.second);
-                                    oo.insert(b.first);
-                                    oo.insert(b.second);
-                                    fprintf(oofp, "%s", m.c_str());
-                                    for (auto it=oo.begin(); it!=oo.end(); ++it) {
-                                        vertex oot = *it;
-                                        fprintf(oofp, ",%s", oot.c_str());
-                                    }
-                                    if (oo.size()<3) {
-                                        fprintf(oofp, ",");
-                                    }
-                                    fprintf(oofp, "\n");
                                 }
                             }
                         }
                     }
                 }
             }
+            
         }
     }
     return;
