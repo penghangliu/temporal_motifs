@@ -124,19 +124,23 @@ void Graph::removeEdge(vertex u, vertex v)
 int Graph::distance(vertex u, vertex v)
 {
     queue<vertex> open;
+    set<vertex> visited;
     int lvl = 1;
     int current = 1;
     
     open.push(u);
     while (!open.empty()) {
         vertex k = open.front();
+        visited.insert(k);
         open.pop();
         current--;
         
         for (int i=0; i<adj[k].size(); i++) {
             vertex x = adj[k][i];
             if(x==v) return lvl;
-            open.push(x);
+            if (visited.find(x)==visited.end()) {
+                open.push(x);
+            }
         }
         
         if (current == 0) {

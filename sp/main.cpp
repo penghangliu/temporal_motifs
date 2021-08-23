@@ -35,12 +35,13 @@ int main(int argc, char * argv[]) {
             stringstream ss (line);
             vertex u, v;
             ss >> u >> v;
-            if (G.check(u,v)) {
+            bool isin = G.check(u,v);
+            if (isin) {
                 G.removeEdge(u,v);
             }
             int d = G.distance(u,v);
             fprintf(fp, "%s,%s,%d \n", u.c_str(), v.c_str(), d);
-            G.addEdge(u,v);
+            if(isin) G.addEdge(u,v);
         }
         i++;
         if (i % 1000 == 0) {
