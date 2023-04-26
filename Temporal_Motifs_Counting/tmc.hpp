@@ -1,11 +1,3 @@
-//
-//  tmc.hpp
-//  tmc
-//
-//  Created by Penghang Liu on 11/25/19.
-//  Copyright © 2019 Penghang Liu. All rights reserved.
-//
-
 #ifndef tmc_hpp
 #define tmc_hpp
 
@@ -46,6 +38,7 @@ typedef vector<event> key;  //a prefix or a motif
 typedef pair<int, set<vertex>> counts;  //the count of the (prefix/motif) and the vertices in the (prefix/motif)
 //typedef unordered_map<vector<event>, set<vertex>> prefix;
 typedef unordered_map<vector<event>, pair<int, set<vertex>>> instancemap; //a hashtable of key and counts
+typedef map<timestamp, set<edge>> eventmap;
 
 template <class T>
 inline void hash_combine(std::size_t & seed, const T & v)
@@ -86,10 +79,11 @@ inline void print_time (FILE* fp, const string& str, tms t) {
     fflush(fp);
 }
 
-void createEvents (string filename, vector<event>& events); //Load and sort the event list
-void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w, string consecutive);    //Increment the instance count and update the prefix type
+void createEvents (string filename, vector<event>& events, int bin); //Load and sort the event list
+bool checkInduced(eventmap Emap, event e, vector<timestamp> T);
+void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w, string consecutive, string dgc, eventmap& Emap);    //Increment the instance count and update the prefix type
 string encodeMotif(vector<event> instance); //identify the type of motif
-void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w);
+void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w, eventmap& Emap);
 set<vertex> getNodes(vector<event> key);
 void countSpecificmotif (event e, set<key>& pre, int& motif_count, string code_given, int N_vtx, int N_event, int d_c, int d_w);
 char sconvert (int i);

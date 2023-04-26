@@ -1,15 +1,23 @@
-# Counting Temporal Motifs
+## Temporal Network Motifs: Models, Limitations, Evaluation
 
-Compile the code
+This is a collection of the codes to count temporal motifs and generate the plots for the results.
 
-`g++ -std=c++11 main.cpp tmc.cpp`
+'Temporal Motifs Counting' has the code for counting the temporal motifs.
 
-Run
+'figures' has the code for plotting the results.
 
-version 1: count all types of motifs
+Please contact penghang@buffalo.edu for any questions.
 
-`./a.out v1 inputfile delta_C delta_W |V| |E| Consecutive(YES/NO)`
+### Reference
+```
+@ARTICLE{liu2021temporal,
+  author={Liu, Penghang and Guarrasi, Valerio and Sarıyüce, Ahmet Erdem},
+  journal={IEEE Transactions on Knowledge and Data Engineering}, 
+  title={Temporal Network Motifs: Models, Limitations, Evaluation}, 
+  year={2023},
+  volume={35},
+  number={1},
+  pages={945-957},
+  doi={10.1109/TKDE.2021.3077495}}
 
-version 2: specified motif query
-
-`./a.out v2 inputfile delta_C delta_W motif`
+```

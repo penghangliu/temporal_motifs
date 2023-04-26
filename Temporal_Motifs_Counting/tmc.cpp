@@ -1,14 +1,6 @@
-//
-//  tmc.cpp
-//  tmc
-//
-//  Created by Penghang Liu on 11/25/19.
-//  Copyright © 2019 Penghang Liu. All rights reserved.
-//
-
 #include "tmc.hpp"
 
-void createEvents (string filename, vector<event>& events){
+void createEvents (string filename, vector<event>& events, int bin){
     ifstream in(filename);
     string line;
     
@@ -19,6 +11,10 @@ void createEvents (string filename, vector<event>& events){
             timestamp t;
             edge e;
             ss >> u >> v >> t;
+            //
+//            int x{60};
+            t = t/bin*bin;
+            //
             if (u != v) {
                 e = make_pair(u, v);
                 events.push_back(make_pair(t, e));
@@ -26,11 +22,11 @@ void createEvents (string filename, vector<event>& events){
         }
     }
     sort(events.begin(), events.end());
-    events.erase(unique(events.begin(), events.end()),events.end()); //remove duplicates
+//    events.erase(unique(events.begin(), events.end()),events.end()); //remove duplicates
     return;
 }
 
-void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w, string consecutive){
+void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_vtx, int N_event, int d_c, int d_w, string consecutive, string dgc, eventmap& Emap){
     vertex u = e.second.first;
     vertex v = e.second.second;
     vector<vector<event>> new_motif;    //used to store the new motifs
@@ -45,16 +41,24 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
                     if (imap[key].second.find(u)!=imap[key].second.end() || imap[key].second.find(v)!=imap[key].second.end()) {
                         if (key.back().first!=e.first) { //check synchronous events
                             vector<event> motif = key;
-                            motif.push_back(e);
-                            new_motif.push_back(motif);
-                            imap[motif].first += imap[key].first;
-                            imap[motif].second = nodes;
+                            vector<timestamp> T;
+                            for (int i=0; i<motif.size(); i++) {
+                                if (motif[i].second.first!=u||motif[i].second.second!=v) {
+                                    T.push_back(motif[i].first);
+                                }
+                            }
+                            if (checkInduced(Emap, e, T)||dgc=="NO") {
+                                motif.push_back(e);
+                                new_motif.push_back(motif);
+                                imap[motif].first += imap[key].first;
+                                imap[motif].second = nodes;
+                                if (consecutive == "YES") {
+                                    it = keys.erase(it);
+                                    continue;
+                                }
+                            }
                         }
                     }
-                }
-                if (consecutive == "YES") {
-                    it = keys.erase(it);
-                    continue;
                 }
                 ++it;
             } else {
@@ -76,6 +80,14 @@ void countInstance (event e, instancemap& imap, set<vector<event>>& keys, int N_
     imap[E].second.insert(u);
     imap[E].second.insert(v);
     keys.insert(E); // add the new event to the current prefix list
+    Emap[e.first].insert(e.second);
+    for (auto it=Emap.begin(); it!=Emap.end(); ) {
+        if (e.first - it->first <=d_c) {
+            ++it;
+        } else {
+            it = Emap.erase(it);
+        }
+    }
     return;
 }
 
@@ -164,7 +176,22 @@ set<vertex> getNodes(vector<event> key){
     return nodes;
 }
 
-void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w){
+bool checkInduced(eventmap Emap, event e, vector<timestamp> T){
+    timestamp t = e.first;
+    vertex u = e.second.first;
+    vertex v = e.second.second;
+    for (int i=0; i<T.size(); i++) {
+        timestamp t0 = T[i];
+        for (auto it = Emap[t0].begin(); it != Emap[t0].end();++it){
+            if (it->first==u && it->second==v) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vtx, int N_event, int d_c, int d_w, eventmap& Emap){
     vertex u = e.second.first;
     vertex v = e.second.second;
     vector<vector<event>> new_motif;    //used to store the new motifs
@@ -172,21 +199,35 @@ void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vt
         vector<event> key = *it;
         set<vertex> nodes = getNodes(key);
         if (e.first - key.front().first <= d_w && e.first - key.back().first <= d_c ) {  //check delta C and delta W
-            if (nodes.find(u)!=nodes.end() || nodes.find(v)!=nodes.end()) {
-                nodes.insert(u);
-                nodes.insert(v);
-                if (nodes.size() <= N_vtx) {    //check the number of vertices
-                    vector<event> motif = key;
-                    motif.push_back(e);
-                    if (motif.size()==N_event && nodes.size()==N_vtx) {
-                        string code = encodeMotif(motif);
-                        motif_count[code] += 1;
-                    } else if(motif.size()<N_event) {
-                        new_motif.push_back(motif);
+            if (key.size() < N_event){  //check n events
+                if (nodes.find(u)!=nodes.end() || nodes.find(v)!=nodes.end()) {
+                    nodes.insert(u);
+                    nodes.insert(v);
+                    if (key.back().first!=e.first) { //check synchronous events
+                        if (nodes.size() <= N_vtx) {    //check the number of vertices
+                            vector<event> motif = key;
+                            vector<timestamp> T;
+                            for (int i=0; i<motif.size(); i++) {
+                                if (motif[i].second.first!=u||motif[i].second.second!=v) {
+                                    T.push_back(motif[i].first);
+                                }
+                            }
+                            if (checkInduced(Emap, e, T)) {
+                                motif.push_back(e);
+                                if (motif.size()==N_event && nodes.size()==N_vtx) {
+                                    string code = encodeMotif(motif);
+                                    motif_count[code] += 1;
+                                } else if(motif.size()<N_event) {
+                                    new_motif.push_back(motif);
+                                }
+                            }
+                        }
                     }
                 }
+                ++it;
+            } else {
+                it = pre.erase(it);    //remove prefix if it exceeds N events constrain
             }
-            ++it;
         } else {
             it = pre.erase(it);    //remove prefix if it exceeds the delta constrain
         }
@@ -200,6 +241,14 @@ void countMotif (event e, set<key>& pre, map<string, int>& motif_count, int N_vt
     vector<event> E;
     E.push_back(e);
     pre.insert(E); // add the new event to the current prefix list
+    Emap[e.first].insert(e.second);
+    for (auto it=Emap.begin(); it!=Emap.end(); ) {
+        if (e.first - it->first <=d_c) {
+            ++it;
+        } else {
+            it = Emap.erase(it);
+        }
+    }
     return;
 }
 
